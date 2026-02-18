@@ -14,46 +14,47 @@
     --muted:#a9a9b3;
     --dealer:#ffd84a;
     --opener:#6bff8a;
-    --cellH: 50px;
+    --cellH: 46px;
   }
 
   *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
   body{
     margin:0; background:var(--bg); color:var(--fg);
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    font-size:14px;
+    font-size:13px;
   }
-  .wrap{ max-width:100%; margin:0 auto; padding:8px 8px 20px; }
+  .wrap{ max-width:100%; margin:0 auto; padding:6px 6px 14px; }
 
   .topbar{
     position:sticky; top:0; z-index:10;
-    margin:-8px -8px 8px;
-    padding:8px 8px calc(8px + env(safe-area-inset-top));
+    margin:-6px -6px 6px;
+    padding:6px 6px calc(6px + env(safe-area-inset-top));
     background:linear-gradient(to bottom, rgba(10,10,12,.96), rgba(10,10,12,.78));
     backdrop-filter: blur(12px);
     border-bottom:1px solid rgba(255,255,255,.06);
     display:flex; gap:6px; align-items:center; flex-wrap:wrap;
   }
-  .title{ font-weight:950; letter-spacing:.2px; font-size:14px; }
+  .title{ font-weight:950; letter-spacing:.2px; font-size:13px; }
   .pill{
-    font-size:11px; color:var(--muted);
+    font-size:10.5px; color:var(--muted);
     border:1px solid var(--line);
     background:rgba(255,255,255,.04);
-    padding:5px 8px;
+    padding:4px 7px;
     border-radius:999px;
     white-space:nowrap;
   }
   .sp{ flex:1; }
+
   .btn{
     border:1px solid var(--line);
     background:rgba(255,255,255,.06);
     color:var(--fg);
-    padding:7px 10px;
+    padding:6px 9px;
     border-radius:12px;
     font-weight:900;
     cursor:pointer;
     user-select:none;
-    font-size:12px;
+    font-size:11.5px;
   }
   .btn:active{ transform:translateY(1px); }
   .btn:disabled{ opacity:.45; cursor:not-allowed; }
@@ -63,11 +64,11 @@
     background:var(--panel);
     border:1px solid var(--line);
     border-radius:14px;
-    padding:10px;
+    padding:8px;
   }
-  .card + .card{ margin-top:8px; }
+  .card + .card{ margin-top:6px; }
 
-  .row{ display:flex; gap:6px; align-items:center; flex-wrap:nowrap; font-size:13px; }
+  .row{ display:flex; gap:6px; align-items:center; flex-wrap:nowrap; }
 
   .seg{
     display:inline-flex;
@@ -78,22 +79,23 @@
   }
   .seg button{
     border:0;
-    padding:6px 9px;
+    padding:6px 8px;
     background:transparent;
     color:var(--muted);
     font-weight:950;
     cursor:pointer;
     white-space:nowrap;
-    font-size:11px;
+    font-size:10.5px;
   }
   .seg button.active{
     color:var(--fg);
     background:rgba(255,255,255,.06);
   }
 
+  /* names = 1 row on phone */
   .names{
     display:grid;
-    grid-template-columns:repeat(2, minmax(0,1fr));
+    grid-template-columns:repeat(4, minmax(0,1fr));
     gap:6px;
     margin-top:6px;
   }
@@ -103,10 +105,11 @@
     background:var(--panel2);
     color:var(--fg);
     border-radius:10px;
-    padding:7px;
+    padding:6px 7px;
     font-weight:900;
     outline:none;
-    font-size:12px;
+    font-size:11.5px;
+    min-width:0;
   }
 
   table{
@@ -114,16 +117,16 @@
     table-layout:fixed;
     border-collapse:separate;
     border-spacing:0;
-    margin-top:8px;
+    margin-top:6px;
     overflow:hidden;
     border:1px solid var(--line);
     border-radius:12px;
-    font-size:12px;
+    font-size:11.5px;
   }
   th, td{
     border-bottom:1px solid var(--line);
     border-right:1px solid var(--line);
-    padding:6px 4px;
+    padding:5px 3px;
     text-align:center;
     vertical-align:middle;
   }
@@ -131,13 +134,13 @@
   th:last-child, td:last-child{ border-right:0; }
   th{
     color:var(--muted);
-    font-size:11px;
+    font-size:10.5px;
     font-weight:950;
     background:rgba(255,255,255,.03);
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   td{ background:rgba(0,0,0,.10); }
-  .colN{ width:32px; color:var(--muted); font-weight:950; font-size:11px; }
+  .colN{ width:30px; color:var(--muted); font-weight:950; font-size:10.5px; }
 
   .dealerCol{ box-shadow: inset 0 0 0 2px rgba(255,216,74,.45); }
   .openerCol{ box-shadow: inset 0 0 0 2px rgba(107,255,138,.40); }
@@ -152,7 +155,7 @@
     align-items:center;
     justify-content:center;
     font-weight:950;
-    font-size:14px;
+    font-size:13px;
     user-select:none;
     overflow:hidden;
   }
@@ -161,22 +164,20 @@
   .cell.tap{ cursor:pointer; }
 
   .circle{
-    width:40px; height:40px;
+    width:36px; height:36px;
     border-radius:999px;
     border:2px solid var(--fg);
     display:flex;
     align-items:center;
     justify-content:center;
     font-weight:950;
-    font-size:12px;
+    font-size:11px;
   }
 
   .bidDot{
     position:absolute;
-    top:8px;
-    right:8px;
-    width:8px;
-    height:8px;
+    top:7px; right:7px;
+    width:7px; height:7px;
     border-radius:999px;
     background:var(--fg);
     opacity:.95;
@@ -191,9 +192,11 @@
     background:rgba(10,10,12,.55);
     backdrop-filter: blur(6px);
   }
+
+  /* IMPORTANT: use type="tel" + inputmode numeric for iOS homescreen keypad */
   .editor{
-    width:70px;
-    height:36px;
+    width:68px;
+    height:34px;
     border-radius:10px;
     border:1px solid var(--line);
     background:#0c0c10;
@@ -206,7 +209,7 @@
 
   .doneRow td{
     background:rgba(0,0,0,.06);
-    padding:6px 8px;
+    padding:5px 6px;
   }
   .doneWrap{
     display:flex;
@@ -214,6 +217,18 @@
     align-items:center;
     gap:6px;
   }
+
+  .miniBtn{
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.05);
+    color:var(--fg);
+    padding:6px 8px;
+    border-radius:10px;
+    font-weight:950;
+    cursor:pointer;
+    font-size:11.5px;
+  }
+  .miniBtn:disabled{ opacity:.45; cursor:not-allowed; }
 
   .rrow td{
     background:rgba(255,255,255,.03);
@@ -226,28 +241,27 @@
     color:var(--fg);
   }
 
-  .totalsWrap{
-    margin-top:8px;
+  /* totals: 1 compact row */
+  .totalsRow{
+    margin-top:6px;
     display:grid;
-    grid-template-columns: repeat(2, minmax(0,1fr));
-    gap:8px;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap:6px;
   }
   .tbox{
     background:var(--panel2);
     border:1px solid var(--line);
     border-radius:12px;
-    padding:10px 8px;
+    padding:8px 6px;
+    min-width:0;
   }
-  .tname{ font-size:11px; color:var(--muted); font-weight:950; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .tval{ margin-top:4px; font-size:18px; font-weight:980; }
-
-  .hint{
-    margin-top:6px;
-    color:var(--muted);
-    font-size:11px;
-    line-height:1.25;
+  .tname{
+    font-size:10.5px; color:var(--muted); font-weight:950;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
+  .tval{ margin-top:3px; font-size:16px; font-weight:980; }
 
+  /* Reset sheet */
   .sheetBack{
     position:fixed; inset:0;
     background:rgba(0,0,0,.55);
@@ -269,94 +283,22 @@
   .sheetText{ color:var(--muted); font-size:12px; margin-top:6px; line-height:1.25; }
   .sheetRow{ display:flex; gap:8px; margin-top:10px; justify-content:flex-end; }
 
-  .miniBtn{
-    border:1px solid var(--line);
-    background:rgba(255,255,255,.05);
-    color:var(--fg);
-    padding:6px 9px;
-    border-radius:10px;
-    font-weight:950;
-    cursor:pointer;
-    font-size:12px;
-  }
-  .miniBtn:disabled{ opacity:.45; cursor:not-allowed; }
-
-  @media (min-width: 768px) {
+  /* desktop relax */
+  @media (min-width: 820px){
     .wrap{ max-width:980px; padding:14px 12px 40px; }
-    .topbar{
-      margin:-14px -12px 12px;
-      padding:10px 10px calc(10px + env(safe-area-inset-top));
-      gap:10px;
-    }
-    .title{ font-size:inherit; }
-    .pill{ font-size:12px; padding:7px 10px; }
-    .btn{ padding:9px 12px; font-size:inherit; }
-    .row{ gap:10px; font-size:inherit; }
-    .seg{ border-radius:14px; }
-    .seg button{ padding:9px 12px; font-size:inherit; }
-    .names{
-      grid-template-columns:repeat(4, minmax(0,1fr));
-      gap:10px;
-      margin-top:10px;
-    }
-    input.name{
-      border-radius:14px;
-      padding:10px;
-      font-size:inherit;
-    }
+    .topbar{ margin:-14px -12px 12px; padding:10px 10px calc(10px + env(safe-area-inset-top)); }
     :root{ --cellH: 54px; }
-    table{
-      margin-top:12px;
-      border-radius:16px;
-      font-size:inherit;
-    }
+    .title{ font-size:inherit; }
+    table{ margin-top:12px; font-size:inherit; }
     th, td{ padding:10px; }
-    th{ font-size:12px; }
     .colN{ width:56px; font-size:inherit; }
-    .cell{
-      border-radius:14px;
-      font-size:16px;
-    }
-    .circle{
-      width:46px; height:46px;
-      font-size:inherit;
-    }
-    .editor{
-      width:88px;
-      height:40px;
-      border-radius:12px;
-      font-size:16px;
-    }
-    .doneRow td{ padding:8px 10px; }
-    .doneWrap{ gap:10px; }
-    .totalsWrap{
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap:10px;
-      margin-top:12px;
-    }
-    .tbox{
-      border-radius:16px;
-      padding:12px 10px;
-    }
+    .cell{ font-size:16px; border-radius:14px; }
+    .circle{ width:46px; height:46px; font-size:inherit; }
+    .editor{ width:88px; height:40px; font-size:16px; border-radius:12px; }
+    .totalsRow{ margin-top:12px; gap:10px; }
+    .tbox{ padding:12px 10px; border-radius:16px; }
     .tname{ font-size:12px; }
-    .tval{ margin-top:6px; font-size:24px; }
-    .hint{
-      margin-top:10px;
-      font-size:12px;
-    }
-    .sheet{
-      width:min(560px, 100%);
-      border-radius:18px;
-      padding:14px;
-    }
-    .sheetTitle{ font-size:inherit; }
-    .sheetText{ font-size:13px; margin-top:6px; }
-    .sheetRow{ gap:10px; margin-top:12px; }
-    .miniBtn{
-      padding:8px 10px;
-      border-radius:12px;
-      font-size:inherit;
-    }
+    .tval{ font-size:24px; margin-top:6px; }
   }
 </style>
 </head>
@@ -371,34 +313,28 @@
     <button class="btn danger" id="resetBtn">Reset</button>
   </div>
 
+  <!-- Single compact island -->
   <div class="card">
     <div class="row">
       <div class="pill">Game</div>
       <div class="seg" id="gameSeg"></div>
       <div class="pill">Half</div>
       <div class="seg">
-        <button type="button" id="half1Btn" class="active">Half 1</button>
-        <button type="button" id="half2Btn">Half 2</button>
+        <button type="button" id="half1Btn" class="active">1/2</button>
+        <button type="button" id="half2Btn">2/2</button>
       </div>
     </div>
-
-    <div style="margin-top:8px;font-weight:950;font-size:13px;">Names</div>
     <div class="names" id="names"></div>
-
-    <div class="hint">
-      Bidder is the <b>first cell you enter</b> in that round. Clear Round wipes it and lets you start again.
-      Done ✓ applies circles. Bidder dot appears on the bidder cell after Done.
-    </div>
   </div>
 
   <div class="card">
     <table>
       <colgroup>
-        <col style="width:32px">
-        <col style="width:calc((100% - 32px)/4)">
-        <col style="width:calc((100% - 32px)/4)">
-        <col style="width:calc((100% - 32px)/4)">
-        <col style="width:calc((100% - 32px)/4)">
+        <col style="width:30px">
+        <col style="width:calc((100% - 30px)/4)">
+        <col style="width:calc((100% - 30px)/4)">
+        <col style="width:calc((100% - 30px)/4)">
+        <col style="width:calc((100% - 30px)/4)">
       </colgroup>
       <thead>
         <tr>
@@ -412,7 +348,7 @@
       <tbody id="tbody"></tbody>
     </table>
 
-    <div class="totalsWrap" id="totals"></div>
+    <div class="totalsRow" id="totals"></div>
   </div>
 </div>
 
@@ -430,7 +366,7 @@
 <script>
 (() => {
   "use strict";
-  const KEY = "boja_calc_full_v2";
+  const KEY = "boja_calc_compact_v1";
 
   function dealerOf(r){ return (r-1) % 4; }
   function openerOf(r){ return (dealerOf(r)+1) % 4; }
@@ -470,7 +406,7 @@
   const elTotals = document.getElementById("totals");
   const elWherePill = document.getElementById("wherePill");
 
-  // ---------- Reset confirm ----------
+  // Reset confirm
   const resetBack = document.getElementById("resetBack");
   document.getElementById("resetBtn").addEventListener("click", () => resetBack.style.display = "flex");
   document.getElementById("cancelReset").addEventListener("click", () => resetBack.style.display = "none");
@@ -482,7 +418,7 @@
   });
   resetBack.addEventListener("click", (e) => { if(e.target === resetBack) resetBack.style.display = "none"; });
 
-  // ---------- New game ----------
+  // New game
   document.getElementById("newGameBtn").addEventListener("click", () => {
     state.games.push(makeGame());
     state.viewGame = state.games.length - 1;
@@ -564,9 +500,12 @@
   function currentRounds(){
     return getGame().halves[state.viewHalf].rounds;
   }
+
   function roundComplete(values){
     return values.every(v => v !== null && v !== undefined);
   }
+
+  // W = bid + sum(non-bidders)
   function computeW(values, bidder, bidAmount){
     let nonSum = 0;
     for(let p=0;p<4;p++){
@@ -621,7 +560,7 @@
     const t = totalsForHalf(game, 1);
     let loser = 0;
     for(let i=1;i<4;i++){
-      if(t[i] < t[loser]) loser = i; // lowest score loses
+      if(t[i] < t[loser]) loser = i;
     }
     return loser;
   }
@@ -635,19 +574,20 @@
     const rounds = currentRounds();
     const tot = [0,0,0,0];
     for(const r of rounds){
-      for(let pReal=0;pReal<4;pReal++){
-        tot[pReal] += displayForCell(r, pReal).score;
+      for(let p=0;p<4;p++){
+        tot[p] += displayForCell(r, p).score;
       }
     }
     return tot;
   }
+
   function totalsUpTo10(){
     const rounds = currentRounds();
     const tot = [0,0,0,0];
     for(let i=0;i<10;i++){
       const r = rounds[i];
-      for(let pReal=0;pReal<4;pReal++){
-        tot[pReal] += displayForCell(r, pReal).score;
+      for(let p=0;p<4;p++){
+        tot[p] += displayForCell(r, p).score;
       }
     }
     return tot;
@@ -666,9 +606,10 @@
     state.games.forEach((_, idx) => {
       const b = document.createElement("button");
       b.type = "button";
-      b.textContent = `Game ${idx+1}`;
+      b.textContent = `G${idx+1}`;
       b.classList.toggle("active", idx === state.viewGame);
       b.addEventListener("click", () => {
+        closeActiveEditor(true);
         state.viewGame = idx;
         save(); render();
       });
@@ -683,37 +624,32 @@
     r.bidAmount = null;
   }
 
-  // --- Editing: fix iOS double-tap problem by switching directly ---
+  // ---- editing (tap next cell keeps keypad) ----
   let activeEditor = null;
   function closeActiveEditor(commit){
     if(!activeEditor) return;
-    const { inp, commitFn, renderFn } = activeEditor;
-    try{
-      if(commit) commitFn();
-      else renderFn();
-    } finally {
-      activeEditor = null;
-    }
+    const { commitFn, renderFn } = activeEditor;
+    activeEditor = null;
+    if(commit) commitFn();
+    else renderFn();
   }
 
   function render(){
     renderGameSeg();
-
     elHalf1.classList.toggle("active", state.viewHalf === 1);
     elHalf2.classList.toggle("active", state.viewHalf === 2);
-    elWherePill.textContent = `Game ${state.viewGame+1} • Half ${state.viewHalf}`;
+    elWherePill.textContent = `G${state.viewGame+1} • ${state.viewHalf}/2`;
 
-    // Names (placeholders only)
+    // names
     elNames.innerHTML = "";
     for(let i=0;i<4;i++){
       const inp = document.createElement("input");
       inp.className = "name";
       inp.type = "text";
-      inp.placeholder = `Player${i+1}`;
+      inp.placeholder = `Player ${i+1}`;
       inp.value = state.players[i] || "";
       inp.addEventListener("input", () => {
         state.players[i] = inp.value;
-        // update header immediately
         for(let k=0;k<4;k++){
           const ri = realIndex(k);
           document.getElementById("h"+k).textContent = pname(ri);
@@ -724,7 +660,7 @@
       elNames.appendChild(inp);
     }
 
-    // Header names by order
+    // headers
     for(let k=0;k<4;k++){
       const ri = realIndex(k);
       document.getElementById("h"+k).textContent = pname(ri);
@@ -735,10 +671,12 @@
     elTbody.innerHTML = "";
 
     for(let idx=0; idx<11; idx++){
+      // R row between 10 and 11
       if(idx === 10){
         const rTotals = totalsUpTo10();
         const trR = document.createElement("tr");
         trR.className = "rrow";
+
         const tdLabel = document.createElement("td");
         tdLabel.className = "colN rlabel";
         tdLabel.textContent = "R";
@@ -747,7 +685,7 @@
         for(let k=0;k<4;k++){
           const ri = realIndex(k);
           const td = document.createElement("td");
-          td.innerHTML = `<div style="font-size:16px;font-weight:980;color:var(--fg);">${rTotals[ri]}</div>`;
+          td.innerHTML = `<div style="font-weight:980;color:var(--fg);">${rTotals[ri]}</div>`;
           trR.appendChild(td);
         }
         elTbody.appendChild(trR);
@@ -797,36 +735,44 @@
           box.addEventListener("click", (ev) => {
             ev.preventDefault();
 
-            // commit existing editor and open new immediately
+            // commit current editor first, then open next immediately
             closeActiveEditor(true);
-
             unfinalizeFrom(rounds, idx);
 
             box.innerHTML = "";
             const overlay = document.createElement("div");
             overlay.className = "editOverlay";
 
+            // iOS homescreen: use tel to force keypad
             const inp = document.createElement("input");
             inp.className = "editor";
-            inp.type = "number";
+            inp.type = "tel";
             inp.inputMode = "numeric";
-            inp.min = "0";
-            inp.max = "13";
+            inp.autocomplete = "off";
+            inp.spellcheck = false;
+            inp.autocapitalize = "off";
+            inp.pattern = "[0-9]*";
             inp.value = (r.values[ri] === null) ? "" : String(r.values[ri]);
 
             overlay.appendChild(inp);
             box.appendChild(overlay);
 
             const commit = () => {
-              const newVal = normVal(inp.value);
-              r.values[ri] = newVal;
+              let raw = (inp.value || "").trim();
+              raw = raw.replace(/[^\d]/g, ""); // keep digits only
+              const newVal = raw === "" ? null : Math.trunc(Number(raw));
 
-              if(r.bidder == null && newVal != null){
+              // clamp 0..13
+              const val = (newVal === null) ? null : Math.max(0, Math.min(13, newVal));
+
+              r.values[ri] = val;
+
+              if(r.bidder == null && val != null){
                 r.bidder = ri;
-                r.bidAmount = newVal;
+                r.bidAmount = val;
               }
               if(r.bidder === ri){
-                r.bidAmount = newVal;
+                r.bidAmount = val;
               }
 
               const any = r.values.some(x => x != null);
@@ -840,16 +786,14 @@
             };
 
             const renderOnly = () => render();
+            activeEditor = { commitFn: commit, renderFn: renderOnly };
 
-            activeEditor = { inp, commitFn: commit, renderFn: renderOnly };
-
-            // Focus next frame helps iOS keep keyboard up
-            requestAnimationFrame(() => inp.focus());
+            // focus reliably in standalone
+            setTimeout(() => inp.focus(), 0);
 
             inp.addEventListener("blur", () => {
-              // blur happens when tapping another cell; we already committed via closeActiveEditor
-              // but if user taps away outside, commit now:
-              if(activeEditor && activeEditor.inp === inp){
+              // if user taps outside (not another cell), commit
+              if(activeEditor){
                 closeActiveEditor(true);
               }
             });
@@ -873,7 +817,7 @@
 
       elTbody.appendChild(tr);
 
-      // Done row with Clear Round
+      // Done row (active only)
       const trDone = document.createElement("tr");
       trDone.className = "doneRow";
       const tdDone = document.createElement("td");
@@ -885,7 +829,7 @@
       const clearBtn = document.createElement("button");
       clearBtn.className = "miniBtn";
       clearBtn.type = "button";
-      clearBtn.textContent = "Clear round";
+      clearBtn.textContent = "Clear";
       clearBtn.disabled = (idx !== activeIdx);
       clearBtn.addEventListener("click", () => {
         closeActiveEditor(false);
@@ -915,7 +859,7 @@
       elTbody.appendChild(trDone);
     }
 
-    // Totals (display in current order)
+    // totals (display in current order)
     const t = totalsForView();
     elTotals.innerHTML = "";
     for(let k=0;k<4;k++){
@@ -932,7 +876,7 @@
     save();
   }
 
-  // Half switching with reorder on half2 first open
+  // half switching
   elHalf1.addEventListener("click", () => {
     closeActiveEditor(true);
     state.viewHalf = 1;
