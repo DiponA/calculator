@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Boja CAlculator</title>
+<title>Boja Calculator</title>
 <style>
   :root{
     --bg:#0a0a0c;
@@ -134,15 +134,14 @@
     font-size:11px;
     font-weight:950;
     background:rgba(255,255,255,.03);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   td{ background:rgba(0,0,0,.10); }
   .colN{ width:32px; color:var(--muted); font-weight:950; font-size:11px; }
 
-  /* Only current active round highlights */
   .dealerCol{ box-shadow: inset 0 0 0 2px rgba(255,216,74,.45); }
   .openerCol{ box-shadow: inset 0 0 0 2px rgba(107,255,138,.40); }
 
-  /* cell fixed size, editor overlays inside */
   .cell{
     position:relative;
     height:var(--cellH);
@@ -172,7 +171,6 @@
     font-size:12px;
   }
 
-  /* bidder dot */
   .bidDot{
     position:absolute;
     top:8px;
@@ -184,7 +182,6 @@
     opacity:.95;
   }
 
-  /* overlay editor (doesn't change layout) */
   .editOverlay{
     position:absolute;
     inset:0;
@@ -251,7 +248,6 @@
     line-height:1.25;
   }
 
-  /* Reset sheet */
   .sheetBack{
     position:fixed; inset:0;
     background:rgba(0,0,0,.55);
@@ -316,7 +312,6 @@
     }
     th, td{ padding:10px; }
     th{ font-size:12px; }
-    td{ font-size:inherit; }
     .colN{ width:56px; font-size:inherit; }
     .cell{
       border-radius:14px;
@@ -398,6 +393,13 @@
 
   <div class="card">
     <table>
+      <colgroup>
+        <col style="width:32px">
+        <col style="width:calc((100% - 32px)/4)">
+        <col style="width:calc((100% - 32px)/4)">
+        <col style="width:calc((100% - 32px)/4)">
+        <col style="width:calc((100% - 32px)/4)">
+      </colgroup>
       <thead>
         <tr>
           <th class="colN">#</th>
@@ -428,7 +430,7 @@
 <script>
 (() => {
   "use strict";
-  const KEY = "boja_calc_dot_clear_overlay_v1";
+  const KEY = "boja_calc_full_v2";
 
   function dealerOf(r){ return (r-1) % 4; }
   function openerOf(r){ return (dealerOf(r)+1) % 4; }
@@ -443,7 +445,12 @@
       }))
     };
   }
-  function makeGame(){ return { halves: { 1: makeHalf(), 2: makeHalf() } }; }
+  function makeGame(){
+    return {
+      halves: { 1: makeHalf(), 2: makeHalf() },
+      orders: { 1: [0,1,2,3], 2: null }
+    };
+  }
   function defaultState(){
     return {
       players: ["","","",""],
@@ -463,7 +470,7 @@
   const elTotals = document.getElementById("totals");
   const elWherePill = document.getElementById("wherePill");
 
-  // Reset confirm
+  // ---------- Reset confirm ----------
   const resetBack = document.getElementById("resetBack");
   document.getElementById("resetBtn").addEventListener("click", () => resetBack.style.display = "flex");
   document.getElementById("cancelReset").addEventListener("click", () => resetBack.style.display = "none");
@@ -475,15 +482,13 @@
   });
   resetBack.addEventListener("click", (e) => { if(e.target === resetBack) resetBack.style.display = "none"; });
 
+  // ---------- New game ----------
   document.getElementById("newGameBtn").addEventListener("click", () => {
     state.games.push(makeGame());
     state.viewGame = state.games.length - 1;
     state.viewHalf = 1;
     save(); render();
   });
-
-  elHalf1.addEventListener("click", () => { state.viewHalf = 1; save(); render(); });
-  elHalf2.addEventListener("click", () => { state.viewHalf = 2; save(); render(); });
 
   function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
 
@@ -503,8 +508,13 @@
         halves: {
           1: normalizeHalf(g?.halves?.["1"] || g?.halves?.[1]),
           2: normalizeHalf(g?.halves?.["2"] || g?.halves?.[2]),
+        },
+        orders: {
+          1: Array.isArray(g?.orders?.["1"] || g?.orders?.[1]) ? (g.orders["1"] || g.orders[1]) : [0,1,2,3],
+          2: Array.isArray(g?.orders?.["2"] || g?.orders?.[2]) ? (g.orders["2"] || g.orders[2]) : null
         }
       }));
+
       return s;
     }catch{
       return defaultState();
@@ -526,7 +536,7 @@
 
   function pname(i){
     const t = (state.players[i] || "").trim();
-    return t.length ? t : `Player${i+1}`;
+    return t.length ? t : `P${i+1}`;
   }
   function normVal(v){
     if(v === null || v === undefined || v === "") return null;
@@ -539,8 +549,20 @@
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
   }
 
+  function getGame(){ return state.games[state.viewGame]; }
+
+  function getOrderForHalf(g, half){
+    if(half === 1) return g.orders[1] || [0,1,2,3];
+    return g.orders[2] || [0,1,2,3];
+  }
+  function realIndex(displayIdx){
+    const g = getGame();
+    const ord = getOrderForHalf(g, state.viewHalf);
+    return ord[displayIdx];
+  }
+
   function currentRounds(){
-    return state.games[state.viewGame].halves[state.viewHalf].rounds;
+    return getGame().halves[state.viewHalf].rounds;
   }
   function roundComplete(values){
     return values.every(v => v !== null && v !== undefined);
@@ -554,8 +576,8 @@
     return bidAmount + nonSum;
   }
 
-  function displayForCell(r, p){
-    const v = r.values[p];
+  function displayForCell(r, pReal){
+    const v = r.values[pReal];
     if(v === null) return { kind:"blank", text:"", score:0 };
     if(!r.finalized) return { kind:"num", text:String(v), score:v };
 
@@ -569,7 +591,7 @@
       if(W > 13) bidderFailed = true;
     }
 
-    if(p === r.bidder){
+    if(pReal === r.bidder){
       if(bidderFailed) return { kind:"circ", text:String(r.bidAmount), score:-r.bidAmount };
       return { kind:"num", text:String(v), score:v };
     }
@@ -581,12 +603,40 @@
     return { kind:"num", text:String(v), score:v };
   }
 
+  function totalsForHalf(game, half){
+    const rounds = game.halves[half].rounds;
+    const tot = [0,0,0,0];
+    for(const r of rounds){
+      for(let i=0;i<4;i++){
+        const d = displayForCell(r, i);
+        tot[i] += d.score;
+      }
+    }
+    return tot;
+  }
+  function halfIsFinished(game, half){
+    return game.halves[half].rounds.every(r => r.finalized);
+  }
+  function loserIndexHalf1(game){
+    const t = totalsForHalf(game, 1);
+    let loser = 0;
+    for(let i=1;i<4;i++){
+      if(t[i] < t[loser]) loser = i; // lowest score loses
+    }
+    return loser;
+  }
+  function rotatedOrderStartingAt(startIdx){
+    const base = [0,1,2,3];
+    const pos = base.indexOf(startIdx);
+    return base.slice(pos).concat(base.slice(0,pos));
+  }
+
   function totalsForView(){
     const rounds = currentRounds();
     const tot = [0,0,0,0];
     for(const r of rounds){
-      for(let p=0;p<4;p++){
-        tot[p] += displayForCell(r, p).score;
+      for(let pReal=0;pReal<4;pReal++){
+        tot[pReal] += displayForCell(r, pReal).score;
       }
     }
     return tot;
@@ -596,8 +646,8 @@
     const tot = [0,0,0,0];
     for(let i=0;i<10;i++){
       const r = rounds[i];
-      for(let p=0;p<4;p++){
-        tot[p] += displayForCell(r, p).score;
+      for(let pReal=0;pReal<4;pReal++){
+        tot[pReal] += displayForCell(r, pReal).score;
       }
     }
     return tot;
@@ -633,6 +683,19 @@
     r.bidAmount = null;
   }
 
+  // --- Editing: fix iOS double-tap problem by switching directly ---
+  let activeEditor = null;
+  function closeActiveEditor(commit){
+    if(!activeEditor) return;
+    const { inp, commitFn, renderFn } = activeEditor;
+    try{
+      if(commit) commitFn();
+      else renderFn();
+    } finally {
+      activeEditor = null;
+    }
+  }
+
   function render(){
     renderGameSeg();
 
@@ -640,22 +703,32 @@
     elHalf2.classList.toggle("active", state.viewHalf === 2);
     elWherePill.textContent = `Game ${state.viewGame+1} • Half ${state.viewHalf}`;
 
-    // names (smooth typing)
+    // Names (placeholders only)
     elNames.innerHTML = "";
     for(let i=0;i<4;i++){
       const inp = document.createElement("input");
       inp.className = "name";
       inp.type = "text";
       inp.placeholder = `Player${i+1}`;
-      inp.value = pname(i);
+      inp.value = state.players[i] || "";
       inp.addEventListener("input", () => {
         state.players[i] = inp.value;
-        document.getElementById("h"+i).textContent = inp.value.trim() || `Player${i+1}`;
+        // update header immediately
+        for(let k=0;k<4;k++){
+          const ri = realIndex(k);
+          document.getElementById("h"+k).textContent = pname(ri);
+        }
+        save();
       });
-      inp.addEventListener("blur", () => { save(); });
+      inp.addEventListener("blur", () => save());
       elNames.appendChild(inp);
     }
-    for(let i=0;i<4;i++) document.getElementById("h"+i).textContent = pname(i);
+
+    // Header names by order
+    for(let k=0;k<4;k++){
+      const ri = realIndex(k);
+      document.getElementById("h"+k).textContent = pname(ri);
+    }
 
     const rounds = currentRounds();
     const activeIdx = activeRoundIndex(rounds);
@@ -670,9 +743,11 @@
         tdLabel.className = "colN rlabel";
         tdLabel.textContent = "R";
         trR.appendChild(tdLabel);
-        for(let p=0;p<4;p++){
+
+        for(let k=0;k<4;k++){
+          const ri = realIndex(k);
           const td = document.createElement("td");
-          td.innerHTML = `<div style="font-size:18px;font-weight:980;color:var(--fg);">${rTotals[p]}</div>`;
+          td.innerHTML = `<div style="font-size:16px;font-weight:980;color:var(--fg);">${rTotals[ri]}</div>`;
           trR.appendChild(td);
         }
         elTbody.appendChild(trR);
@@ -692,23 +767,24 @@
       const isEditableNow = (idx <= activeIdx);
       const showTurnColors = (idx === activeIdx);
 
-      for(let p=0;p<4;p++){
+      for(let k=0;k<4;k++){
+        const ri = realIndex(k);
+
         const td = document.createElement("td");
         if(showTurnColors){
-          if(p === dealer) td.classList.add("dealerCol");
-          if(p === opener) td.classList.add("openerCol");
+          if(k === dealer) td.classList.add("dealerCol");
+          if(k === opener) td.classList.add("openerCol");
         }
 
         const box = document.createElement("div");
         box.className = "cell";
 
-        const d = displayForCell(r, p);
+        const d = displayForCell(r, ri);
         if(d.kind === "blank"){ box.classList.add("blank"); box.textContent = ""; }
         else if(d.kind === "num"){ box.textContent = d.text; }
         else { box.innerHTML = `<div class="circle">${d.text}</div>`; }
 
-        // bidder dot after Done ✓
-        if(r.finalized && r.bidder === p){
+        if(r.finalized && r.bidder === ri){
           const dot = document.createElement("div");
           dot.className = "bidDot";
           box.appendChild(dot);
@@ -718,10 +794,14 @@
           box.classList.add("disabled");
         } else {
           box.classList.add("tap");
-          box.addEventListener("click", () => {
+          box.addEventListener("click", (ev) => {
+            ev.preventDefault();
+
+            // commit existing editor and open new immediately
+            closeActiveEditor(true);
+
             unfinalizeFrom(rounds, idx);
 
-            // overlay editor, no stretching
             box.innerHTML = "";
             const overlay = document.createElement("div");
             overlay.className = "editOverlay";
@@ -732,28 +812,23 @@
             inp.inputMode = "numeric";
             inp.min = "0";
             inp.max = "13";
-            inp.value = (r.values[p] === null) ? "" : String(r.values[p]);
+            inp.value = (r.values[ri] === null) ? "" : String(r.values[ri]);
 
             overlay.appendChild(inp);
             box.appendChild(overlay);
-            inp.focus();
 
             const commit = () => {
               const newVal = normVal(inp.value);
-              r.values[p] = newVal;
+              r.values[ri] = newVal;
 
-              // set bidder if not set and they entered something
               if(r.bidder == null && newVal != null){
-                r.bidder = p;
+                r.bidder = ri;
+                r.bidAmount = newVal;
+              }
+              if(r.bidder === ri){
                 r.bidAmount = newVal;
               }
 
-              // keep bidAmount synced with bidder cell
-              if(r.bidder === p){
-                r.bidAmount = newVal;
-              }
-
-              // if all cleared, reset bidder info
               const any = r.values.some(x => x != null);
               if(!any){
                 r.bidder = null;
@@ -764,17 +839,30 @@
               render();
             };
 
-            const cancel = () => { render(); };
+            const renderOnly = () => render();
 
-            inp.addEventListener("blur", commit);
-            inp.addEventListener("keydown", (e) => {
-              if(e.key === "Enter"){ e.preventDefault(); inp.blur(); }
-              if(e.key === "Escape"){ e.preventDefault(); cancel(); }
+            activeEditor = { inp, commitFn: commit, renderFn: renderOnly };
+
+            // Focus next frame helps iOS keep keyboard up
+            requestAnimationFrame(() => inp.focus());
+
+            inp.addEventListener("blur", () => {
+              // blur happens when tapping another cell; we already committed via closeActiveEditor
+              // but if user taps away outside, commit now:
+              if(activeEditor && activeEditor.inp === inp){
+                closeActiveEditor(true);
+              }
             });
 
-            // tap outside input (on overlay) commits like blur
+            inp.addEventListener("keydown", (e) => {
+              if(e.key === "Enter"){ e.preventDefault(); closeActiveEditor(true); }
+              if(e.key === "Escape"){ e.preventDefault(); closeActiveEditor(false); }
+            });
+
             overlay.addEventListener("click", (e) => {
-              if(e.target === overlay) inp.blur();
+              if(e.target === overlay){
+                closeActiveEditor(true);
+              }
             });
           });
         }
@@ -798,8 +886,9 @@
       clearBtn.className = "miniBtn";
       clearBtn.type = "button";
       clearBtn.textContent = "Clear round";
-      clearBtn.disabled = (idx !== activeIdx); // keep workflow simple
+      clearBtn.disabled = (idx !== activeIdx);
       clearBtn.addEventListener("click", () => {
+        closeActiveEditor(false);
         clearRound(r);
         save();
         render();
@@ -813,6 +902,7 @@
       const canDone = (idx === activeIdx) && (r.bidder != null) && (r.bidAmount != null);
       doneBtn.disabled = !canDone;
       doneBtn.addEventListener("click", () => {
+        closeActiveEditor(true);
         r.finalized = true;
         save();
         render();
@@ -825,21 +915,40 @@
       elTbody.appendChild(trDone);
     }
 
-    // totals
+    // Totals (display in current order)
     const t = totalsForView();
     elTotals.innerHTML = "";
-    for(let i=0;i<4;i++){
+    for(let k=0;k<4;k++){
+      const ri = realIndex(k);
       const b = document.createElement("div");
       b.className = "tbox";
       b.innerHTML = `
-        <div class="tname">${escapeHtml(pname(i))}</div>
-        <div class="tval">${t[i]}</div>
+        <div class="tname">${escapeHtml(pname(ri))}</div>
+        <div class="tval">${t[ri]}</div>
       `;
       elTotals.appendChild(b);
     }
 
     save();
   }
+
+  // Half switching with reorder on half2 first open
+  elHalf1.addEventListener("click", () => {
+    closeActiveEditor(true);
+    state.viewHalf = 1;
+    save(); render();
+  });
+
+  elHalf2.addEventListener("click", () => {
+    closeActiveEditor(true);
+    const g = getGame();
+    if(!g.orders[2] && halfIsFinished(g, 1)){
+      const loser = loserIndexHalf1(g);
+      g.orders[2] = rotatedOrderStartingAt(loser);
+    }
+    state.viewHalf = 2;
+    save(); render();
+  });
 
   render();
 })();
