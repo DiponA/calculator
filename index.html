@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Boja CAlculator</title>
+<style>
+  :root{
+    --bg:#0a0a0c;
+    --panel:#101015;
+    --panel2:#14141b;
+    --line:#2a2a35;
+    --fg:#f2f2f3;
+    --muted:#a9a9b3;
+    --dealer:#ffd84a;
+    --opener:#6bff8a;
+    --cellH: 50px;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    font-size:14px;
+  }
+  .wrap{ max-width:100%; margin:0 auto; padding:8px 8px 20px; }
+
+  .topbar{
+    position:sticky; top:0; z-index:10;
+    margin:-8px -8px 8px;
+    padding:8px 8px calc(8px + env(safe-area-inset-top));
+    background:linear-gradient(to bottom, rgba(10,10,12,.96), rgba(10,10,12,.78));
+    backdrop-filter: blur(12px);
+    border-bottom:1px solid rgba(255,255,255,.06);
+    display:flex; gap:6px; align-items:center; flex-wrap:wrap;
+  }
+  .title{ font-weight:950; letter-spacing:.2px; font-size:14px; }
+  .pill{
+    font-size:11px; color:var(--muted);
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.04);
+    padding:5px 8px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .sp{ flex:1; }
+  .btn{
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.06);
+    color:var(--fg);
+    padding:7px 10px;
+    border-radius:12px;
+    font-weight:900;
+    cursor:pointer;
+    user-select:none;
+    font-size:12px;
+  }
+  .btn:active{ transform:translateY(1px); }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .btn.danger{ border-color: rgba(255,111,111,.35); }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:10px;
+  }
+  .card + .card{ margin-top:8px; }
+
+  .row{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; font-size:13px; }
+
+  .seg{
+    display:inline-flex;
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+    background:rgba(255,255,255,.03);
+  }
+  .seg button{
+    border:0;
+    padding:6px 9px;
+    background:transparent;
+    color:var(--muted);
+    font-weight:950;
+    cursor:pointer;
+    white-space:nowrap;
+    font-size:11px;
+  }
+  .seg button.active{
+    color:var(--fg);
+    background:rgba(255,255,255,.06);
+  }
+
+  .names{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:6px;
+    margin-top:6px;
+  }
+  input.name{
+    width:100%;
+    border:1px solid var(--line);
+    background:var(--panel2);
+    color:var(--fg);
+    border-radius:10px;
+    padding:7px;
+    font-weight:900;
+    outline:none;
+    font-size:12px;
+  }
+
+  table{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    margin-top:8px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    border-radius:12px;
+    font-size:12px;
+  }
+  th, td{
+    border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line);
+    padding:6px 4px;
+    text-align:center;
+    vertical-align:middle;
+  }
+  tr:last-child td{ border-bottom:0; }
+  th:last-child, td:last-child{ border-right:0; }
+  th{
+    color:var(--muted);
+    font-size:11px;
+    font-weight:950;
+    background:rgba(255,255,255,.03);
+  }
+  td{ background:rgba(0,0,0,.10); }
+  .colN{ width:32px; color:var(--muted); font-weight:950; font-size:11px; }
+
+  /* Only current active round highlights */
+  .dealerCol{ box-shadow: inset 0 0 0 2px rgba(255,216,74,.45); }
+  .openerCol{ box-shadow: inset 0 0 0 2px rgba(107,255,138,.40); }
+
+  /* cell fixed size, editor overlays inside */
+  .cell{
+    position:relative;
+    height:var(--cellH);
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(0,0,0,.18);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:950;
+    font-size:14px;
+    user-select:none;
+    overflow:hidden;
+  }
+  .cell.blank{ color:rgba(242,242,243,.18); }
+  .cell.disabled{ opacity:.45; }
+  .cell.tap{ cursor:pointer; }
+
+  .circle{
+    width:40px; height:40px;
+    border-radius:999px;
+    border:2px solid var(--fg);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:950;
+    font-size:12px;
+  }
+
+  /* bidder dot */
+  .bidDot{
+    position:absolute;
+    top:8px;
+    right:8px;
+    width:8px;
+    height:8px;
+    border-radius:999px;
+    background:var(--fg);
+    opacity:.95;
+  }
+
+  /* overlay editor (doesn't change layout) */
+  .editOverlay{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(10,10,12,.55);
+    backdrop-filter: blur(6px);
+  }
+  .editor{
+    width:70px;
+    height:36px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:#0c0c10;
+    color:var(--fg);
+    font-weight:950;
+    font-size:14px;
+    text-align:center;
+    outline:none;
+  }
+
+  .doneRow td{
+    background:rgba(0,0,0,.06);
+    padding:6px 8px;
+  }
+  .doneWrap{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:6px;
+  }
+
+  .rrow td{
+    background:rgba(255,255,255,.03);
+    color:var(--muted);
+    font-weight:950;
+  }
+  .rlabel{
+    font-weight:980;
+    letter-spacing:.3px;
+    color:var(--fg);
+  }
+
+  .totalsWrap{
+    margin-top:8px;
+    display:grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap:8px;
+  }
+  .tbox{
+    background:var(--panel2);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 8px;
+  }
+  .tname{ font-size:11px; color:var(--muted); font-weight:950; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tval{ margin-top:4px; font-size:18px; font-weight:980; }
+
+  .hint{
+    margin-top:6px;
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.25;
+  }
+
+  /* Reset sheet */
+  .sheetBack{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.55);
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+    z-index:50;
+  }
+  .sheet{
+    width:min(100%, calc(100% - 16px));
+    background:rgba(20,20,27,.98);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:14px;
+    padding:12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  }
+  .sheetTitle{ font-weight:980; font-size:14px; }
+  .sheetText{ color:var(--muted); font-size:12px; margin-top:6px; line-height:1.25; }
+  .sheetRow{ display:flex; gap:8px; margin-top:10px; justify-content:flex-end; }
+
+  .miniBtn{
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.05);
+    color:var(--fg);
+    padding:6px 9px;
+    border-radius:10px;
+    font-weight:950;
+    cursor:pointer;
+    font-size:12px;
+  }
+  .miniBtn:disabled{ opacity:.45; cursor:not-allowed; }
+
+  @media (min-width: 768px) {
+    .wrap{ max-width:980px; padding:14px 12px 40px; }
+    .topbar{
+      margin:-14px -12px 12px;
+      padding:10px 10px calc(10px + env(safe-area-inset-top));
+      gap:10px;
+    }
+    .title{ font-size:inherit; }
+    .pill{ font-size:12px; padding:7px 10px; }
+    .btn{ padding:9px 12px; font-size:inherit; }
+    .row{ gap:10px; font-size:inherit; }
+    .seg{ border-radius:14px; }
+    .seg button{ padding:9px 12px; font-size:inherit; }
+    .names{
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    input.name{
+      border-radius:14px;
+      padding:10px;
+      font-size:inherit;
+    }
+    :root{ --cellH: 54px; }
+    table{
+      margin-top:12px;
+      border-radius:16px;
+      font-size:inherit;
+    }
+    th, td{ padding:10px; }
+    th{ font-size:12px; }
+    td{ font-size:inherit; }
+    .colN{ width:56px; font-size:inherit; }
+    .cell{
+      border-radius:14px;
+      font-size:16px;
+    }
+    .circle{
+      width:46px; height:46px;
+      font-size:inherit;
+    }
+    .editor{
+      width:88px;
+      height:40px;
+      border-radius:12px;
+      font-size:16px;
+    }
+    .doneRow td{ padding:8px 10px; }
+    .doneWrap{ gap:10px; }
+    .totalsWrap{
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    .tbox{
+      border-radius:16px;
+      padding:12px 10px;
+    }
+    .tname{ font-size:12px; }
+    .tval{ margin-top:6px; font-size:24px; }
+    .hint{
+      margin-top:10px;
+      font-size:12px;
+    }
+    .sheet{
+      width:min(560px, 100%);
+      border-radius:18px;
+      padding:14px;
+    }
+    .sheetTitle{ font-size:inherit; }
+    .sheetText{ font-size:13px; margin-top:6px; }
+    .sheetRow{ gap:10px; margin-top:12px; }
+    .miniBtn{
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:inherit;
+    }
+  }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="title">Boja calculator</div>
+    <div class="pill" id="wherePill">Game 1 • Half 1</div>
+    <div class="sp"></div>
+    <button class="btn" id="newGameBtn">New game</button>
+    <button class="btn danger" id="resetBtn">Reset</button>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div class="pill">Game</div>
+      <div class="seg" id="gameSeg"></div>
+      <div class="pill">Half</div>
+      <div class="seg">
+        <button type="button" id="half1Btn" class="active">Half 1</button>
+        <button type="button" id="half2Btn">Half 2</button>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;font-weight:950;">Names</div>
+    <div class="names" id="names"></div>
+
+    <div class="hint">
+      Bidder is the <b>first cell you enter</b> in that round. Clear Round wipes it and lets you start again.
+      Done ✓ applies circles. Bidder dot appears on the bidder cell after Done.
+    </div>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th class="colN">#</th>
+          <th id="h0">P1</th>
+          <th id="h1">P2</th>
+          <th id="h2">P3</th>
+          <th id="h3">P4</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+
+    <div class="totalsWrap" id="totals"></div>
+  </div>
+</div>
+
+<div class="sheetBack" id="resetBack">
+  <div class="sheet">
+    <div class="sheetTitle">Reset everything?</div>
+    <div class="sheetText">This deletes all games and scores on this device.</div>
+    <div class="sheetRow">
+      <button class="btn" id="cancelReset">Cancel</button>
+      <button class="btn danger" id="confirmReset">Reset</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const KEY = "boja_calc_dot_clear_overlay_v1";
+
+  function dealerOf(r){ return (r-1) % 4; }
+  function openerOf(r){ return (dealerOf(r)+1) % 4; }
+
+  function makeHalf(){
+    return {
+      rounds: Array.from({length:11}, () => ({
+        values:[null,null,null,null],
+        finalized:false,
+        bidder:null,
+        bidAmount:null
+      }))
+    };
+  }
+  function makeGame(){ return { halves: { 1: makeHalf(), 2: makeHalf() } }; }
+  function defaultState(){
+    return {
+      players: ["Player1","Player2","Player3","Player4"],
+      games: [ makeGame() ],
+      viewGame: 0,
+      viewHalf: 1
+    };
+  }
+
+  let state = load();
+
+  const elGameSeg = document.getElementById("gameSeg");
+  const elHalf1 = document.getElementById("half1Btn");
+  const elHalf2 = document.getElementById("half2Btn");
+  const elNames = document.getElementById("names");
+  const elTbody = document.getElementById("tbody");
+  const elTotals = document.getElementById("totals");
+  const elWherePill = document.getElementById("wherePill");
+
+  // Reset confirm
+  const resetBack = document.getElementById("resetBack");
+  document.getElementById("resetBtn").addEventListener("click", () => resetBack.style.display = "flex");
+  document.getElementById("cancelReset").addEventListener("click", () => resetBack.style.display = "none");
+  document.getElementById("confirmReset").addEventListener("click", () => {
+    localStorage.removeItem(KEY);
+    state = defaultState();
+    resetBack.style.display = "none";
+    save(); render();
+  });
+  resetBack.addEventListener("click", (e) => { if(e.target === resetBack) resetBack.style.display = "none"; });
+
+  document.getElementById("newGameBtn").addEventListener("click", () => {
+    state.games.push(makeGame());
+    state.viewGame = state.games.length - 1;
+    state.viewHalf = 1;
+    save(); render();
+  });
+
+  elHalf1.addEventListener("click", () => { state.viewHalf = 1; save(); render(); });
+  elHalf2.addEventListener("click", () => { state.viewHalf = 2; save(); render(); });
+
+  function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(KEY);
+      if(!raw) return defaultState();
+      const s = JSON.parse(raw);
+
+      if(!Array.isArray(s.players) || s.players.length !== 4) s.players = defaultState().players;
+      if(!Array.isArray(s.games) || s.games.length < 1) s.games = defaultState().games;
+
+      s.viewGame = Number.isInteger(s.viewGame) ? Math.max(0, Math.min(s.viewGame, s.games.length-1)) : 0;
+      s.viewHalf = (s.viewHalf === 2) ? 2 : 1;
+
+      s.games = s.games.map(g => ({
+        halves: {
+          1: normalizeHalf(g?.halves?.["1"] || g?.halves?.[1]),
+          2: normalizeHalf(g?.halves?.["2"] || g?.halves?.[2]),
+        }
+      }));
+      return s;
+    }catch{
+      return defaultState();
+    }
+  }
+
+  function normalizeHalf(h){
+    const def = makeHalf();
+    if(!h || !Array.isArray(h.rounds) || h.rounds.length !== 11) return def;
+    return {
+      rounds: h.rounds.map(r => ({
+        values: Array.isArray(r.values) ? r.values.slice(0,4).map(normVal) : [null,null,null,null],
+        finalized: !!r.finalized,
+        bidder: (Number.isInteger(r.bidder) && r.bidder>=0 && r.bidder<=3) ? r.bidder : null,
+        bidAmount: normVal(r.bidAmount)
+      }))
+    };
+  }
+
+  function pname(i){
+    const t = (state.players[i] || "").trim();
+    return t.length ? t : `Player${i+1}`;
+  }
+  function normVal(v){
+    if(v === null || v === undefined || v === "") return null;
+    const n = Number(v);
+    if(!Number.isFinite(n)) return null;
+    return Math.trunc(n);
+  }
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+  }
+
+  function currentRounds(){
+    return state.games[state.viewGame].halves[state.viewHalf].rounds;
+  }
+  function roundComplete(values){
+    return values.every(v => v !== null && v !== undefined);
+  }
+  function computeW(values, bidder, bidAmount){
+    let nonSum = 0;
+    for(let p=0;p<4;p++){
+      if(p === bidder) continue;
+      nonSum += (values[p] ?? 0);
+    }
+    return bidAmount + nonSum;
+  }
+
+  function displayForCell(r, p){
+    const v = r.values[p];
+    if(v === null) return { kind:"blank", text:"", score:0 };
+    if(!r.finalized) return { kind:"num", text:String(v), score:v };
+
+    if(r.bidder == null || r.bidAmount == null){
+      return { kind:"num", text:String(v), score:v };
+    }
+
+    let bidderFailed = false;
+    if(roundComplete(r.values)){
+      const W = computeW(r.values, r.bidder, r.bidAmount);
+      if(W > 13) bidderFailed = true;
+    }
+
+    if(p === r.bidder){
+      if(bidderFailed) return { kind:"circ", text:String(r.bidAmount), score:-r.bidAmount };
+      return { kind:"num", text:String(v), score:v };
+    }
+
+    if(v === 0){
+      return { kind:"circ", text:String(r.bidAmount), score:-r.bidAmount };
+    }
+
+    return { kind:"num", text:String(v), score:v };
+  }
+
+  function totalsForView(){
+    const rounds = currentRounds();
+    const tot = [0,0,0,0];
+    for(const r of rounds){
+      for(let p=0;p<4;p++){
+        tot[p] += displayForCell(r, p).score;
+      }
+    }
+    return tot;
+  }
+  function totalsUpTo10(){
+    const rounds = currentRounds();
+    const tot = [0,0,0,0];
+    for(let i=0;i<10;i++){
+      const r = rounds[i];
+      for(let p=0;p<4;p++){
+        tot[p] += displayForCell(r, p).score;
+      }
+    }
+    return tot;
+  }
+
+  function activeRoundIndex(rounds){
+    const i = rounds.findIndex(r => !r.finalized);
+    return (i === -1) ? 10 : i;
+  }
+  function unfinalizeFrom(rounds, idx){
+    for(let i=idx;i<rounds.length;i++) rounds[i].finalized = false;
+  }
+
+  function renderGameSeg(){
+    elGameSeg.innerHTML = "";
+    state.games.forEach((_, idx) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = `Game ${idx+1}`;
+      b.classList.toggle("active", idx === state.viewGame);
+      b.addEventListener("click", () => {
+        state.viewGame = idx;
+        save(); render();
+      });
+      elGameSeg.appendChild(b);
+    });
+  }
+
+  function clearRound(r){
+    r.values = [null,null,null,null];
+    r.finalized = false;
+    r.bidder = null;
+    r.bidAmount = null;
+  }
+
+  function render(){
+    renderGameSeg();
+
+    elHalf1.classList.toggle("active", state.viewHalf === 1);
+    elHalf2.classList.toggle("active", state.viewHalf === 2);
+    elWherePill.textContent = `Game ${state.viewGame+1} • Half ${state.viewHalf}`;
+
+    // names (smooth typing)
+    elNames.innerHTML = "";
+    for(let i=0;i<4;i++){
+      const inp = document.createElement("input");
+      inp.className = "name";
+      inp.type = "text";
+      inp.value = pname(i);
+      inp.addEventListener("input", () => {
+        state.players[i] = inp.value;
+        document.getElementById("h"+i).textContent = inp.value.trim() || `Player${i+1}`;
+        save();
+      });
+      inp.addEventListener("blur", () => { save(); render(); });
+      elNames.appendChild(inp);
+    }
+    document.getElementById("h0").textContent = pname(0);
+    document.getElementById("h1").textContent = pname(1);
+    document.getElementById("h2").textContent = pname(2);
+    document.getElementById("h3").textContent = pname(3);
+
+    const rounds = currentRounds();
+    const activeIdx = activeRoundIndex(rounds);
+    elTbody.innerHTML = "";
+
+    for(let idx=0; idx<11; idx++){
+      if(idx === 10){
+        const rTotals = totalsUpTo10();
+        const trR = document.createElement("tr");
+        trR.className = "rrow";
+        const tdLabel = document.createElement("td");
+        tdLabel.className = "colN rlabel";
+        tdLabel.textContent = "R";
+        trR.appendChild(tdLabel);
+        for(let p=0;p<4;p++){
+          const td = document.createElement("td");
+          td.innerHTML = `<div style="font-size:18px;font-weight:980;color:var(--fg);">${rTotals[p]}</div>`;
+          trR.appendChild(td);
+        }
+        elTbody.appendChild(trR);
+      }
+
+      const roundNumber = idx + 1;
+      const r = rounds[idx];
+
+      const tr = document.createElement("tr");
+      const tdN = document.createElement("td");
+      tdN.className = "colN";
+      tdN.textContent = String(roundNumber);
+      tr.appendChild(tdN);
+
+      const dealer = dealerOf(roundNumber);
+      const opener = openerOf(roundNumber);
+      const isEditableNow = (idx <= activeIdx);
+      const showTurnColors = (idx === activeIdx);
+
+      for(let p=0;p<4;p++){
+        const td = document.createElement("td");
+        if(showTurnColors){
+          if(p === dealer) td.classList.add("dealerCol");
+          if(p === opener) td.classList.add("openerCol");
+        }
+
+        const box = document.createElement("div");
+        box.className = "cell";
+
+        const d = displayForCell(r, p);
+        if(d.kind === "blank"){ box.classList.add("blank"); box.textContent = ""; }
+        else if(d.kind === "num"){ box.textContent = d.text; }
+        else { box.innerHTML = `<div class="circle">${d.text}</div>`; }
+
+        // bidder dot after Done ✓
+        if(r.finalized && r.bidder === p){
+          const dot = document.createElement("div");
+          dot.className = "bidDot";
+          box.appendChild(dot);
+        }
+
+        if(!isEditableNow){
+          box.classList.add("disabled");
+        } else {
+          box.classList.add("tap");
+          box.addEventListener("click", () => {
+            unfinalizeFrom(rounds, idx);
+
+            // overlay editor, no stretching
+            box.innerHTML = "";
+            const overlay = document.createElement("div");
+            overlay.className = "editOverlay";
+
+            const inp = document.createElement("input");
+            inp.className = "editor";
+            inp.type = "number";
+            inp.inputMode = "numeric";
+            inp.min = "0";
+            inp.max = "13";
+            inp.value = (r.values[p] === null) ? "" : String(r.values[p]);
+
+            overlay.appendChild(inp);
+            box.appendChild(overlay);
+            inp.focus();
+
+            const commit = () => {
+              const newVal = normVal(inp.value);
+              r.values[p] = newVal;
+
+              // set bidder if not set and they entered something
+              if(r.bidder == null && newVal != null){
+                r.bidder = p;
+                r.bidAmount = newVal;
+              }
+
+              // keep bidAmount synced with bidder cell
+              if(r.bidder === p){
+                r.bidAmount = newVal;
+              }
+
+              // if all cleared, reset bidder info
+              const any = r.values.some(x => x != null);
+              if(!any){
+                r.bidder = null;
+                r.bidAmount = null;
+              }
+
+              save(); render();
+            };
+
+            const cancel = () => { save(); render(); };
+
+            inp.addEventListener("blur", commit);
+            inp.addEventListener("keydown", (e) => {
+              if(e.key === "Enter"){ e.preventDefault(); inp.blur(); }
+              if(e.key === "Escape"){ e.preventDefault(); cancel(); }
+            });
+
+            // tap outside input (on overlay) commits like blur
+            overlay.addEventListener("click", (e) => {
+              if(e.target === overlay) inp.blur();
+            });
+          });
+        }
+
+        td.appendChild(box);
+        tr.appendChild(td);
+      }
+
+      elTbody.appendChild(tr);
+
+      // Done row with Clear Round
+      const trDone = document.createElement("tr");
+      trDone.className = "doneRow";
+      const tdDone = document.createElement("td");
+      tdDone.colSpan = 5;
+
+      const wrap = document.createElement("div");
+      wrap.className = "doneWrap";
+
+      const clearBtn = document.createElement("button");
+      clearBtn.className = "miniBtn";
+      clearBtn.type = "button";
+      clearBtn.textContent = "Clear round";
+      clearBtn.disabled = (idx !== activeIdx); // keep workflow simple
+      clearBtn.addEventListener("click", () => {
+        clearRound(r);
+        save(); render();
+      });
+
+      const doneBtn = document.createElement("button");
+      doneBtn.className = "btn";
+      doneBtn.type = "button";
+      doneBtn.textContent = "Done ✓";
+
+      const canDone = (idx === activeIdx) && (r.bidder != null) && (r.bidAmount != null);
+      doneBtn.disabled = !canDone;
+      doneBtn.addEventListener("click", () => {
+        r.finalized = true;
+        save(); render();
+      });
+
+      wrap.appendChild(clearBtn);
+      wrap.appendChild(doneBtn);
+      tdDone.appendChild(wrap);
+      trDone.appendChild(tdDone);
+      elTbody.appendChild(trDone);
+    }
+
+    // totals
+    const t = totalsForView();
+    elTotals.innerHTML = "";
+    for(let i=0;i<4;i++){
+      const b = document.createElement("div");
+      b.className = "tbox";
+      b.innerHTML = `
+        <div class="tname">${escapeHtml(pname(i))}</div>
+        <div class="tval">${t[i]}</div>
+      `;
+      elTotals.appendChild(b);
+    }
+
+    save();
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
