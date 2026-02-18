@@ -111,6 +111,7 @@
 
   table{
     width:100%;
+    table-layout:fixed;
     border-collapse:separate;
     border-spacing:0;
     margin-top:8px;
@@ -645,6 +646,7 @@
       const inp = document.createElement("input");
       inp.className = "name";
       inp.type = "text";
+      inp.placeholder = `Player${i+1}`;
       inp.value = pname(i);
       inp.addEventListener("input", () => {
         state.players[i] = inp.value;
