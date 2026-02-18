@@ -67,7 +67,7 @@
   }
   .card + .card{ margin-top:8px; }
 
-  .row{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; font-size:13px; }
+  .row{ display:flex; gap:6px; align-items:center; flex-wrap:nowrap; font-size:13px; }
 
   .seg{
     display:inline-flex;
@@ -386,7 +386,7 @@
       </div>
     </div>
 
-    <div style="margin-top:10px;font-weight:950;">Names</div>
+    <div style="margin-top:8px;font-weight:950;font-size:13px;">Names</div>
     <div class="names" id="names"></div>
 
     <div class="hint">
@@ -445,7 +445,7 @@
   function makeGame(){ return { halves: { 1: makeHalf(), 2: makeHalf() } }; }
   function defaultState(){
     return {
-      players: ["Player1","Player2","Player3","Player4"],
+      players: ["","","",""],
       games: [ makeGame() ],
       viewGame: 0,
       viewHalf: 1
@@ -649,15 +649,11 @@
       inp.addEventListener("input", () => {
         state.players[i] = inp.value;
         document.getElementById("h"+i).textContent = inp.value.trim() || `Player${i+1}`;
-        save();
       });
-      inp.addEventListener("blur", () => { save(); render(); });
+      inp.addEventListener("blur", () => { save(); });
       elNames.appendChild(inp);
     }
-    document.getElementById("h0").textContent = pname(0);
-    document.getElementById("h1").textContent = pname(1);
-    document.getElementById("h2").textContent = pname(2);
-    document.getElementById("h3").textContent = pname(3);
+    for(let i=0;i<4;i++) document.getElementById("h"+i).textContent = pname(i);
 
     const rounds = currentRounds();
     const activeIdx = activeRoundIndex(rounds);
@@ -762,10 +758,11 @@
                 r.bidAmount = null;
               }
 
-              save(); render();
+              save();
+              render();
             };
 
-            const cancel = () => { save(); render(); };
+            const cancel = () => { render(); };
 
             inp.addEventListener("blur", commit);
             inp.addEventListener("keydown", (e) => {
@@ -802,7 +799,8 @@
       clearBtn.disabled = (idx !== activeIdx); // keep workflow simple
       clearBtn.addEventListener("click", () => {
         clearRound(r);
-        save(); render();
+        save();
+        render();
       });
 
       const doneBtn = document.createElement("button");
@@ -814,7 +812,8 @@
       doneBtn.disabled = !canDone;
       doneBtn.addEventListener("click", () => {
         r.finalized = true;
-        save(); render();
+        save();
+        render();
       });
 
       wrap.appendChild(clearBtn);
