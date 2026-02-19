@@ -16,7 +16,6 @@
     --opener:#6bff8a;
     --cellH: 46px;
   }
-
   *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
   body{
     margin:0; background:var(--bg); color:var(--fg);
@@ -44,7 +43,6 @@
     white-space:nowrap;
   }
   .sp{ flex:1; }
-
   .btn{
     border:1px solid var(--line);
     background:rgba(255,255,255,.06);
@@ -69,7 +67,6 @@
   .card + .card{ margin-top:6px; }
 
   .row{ display:flex; gap:6px; align-items:center; flex-wrap:nowrap; }
-
   .seg{
     display:inline-flex;
     border:1px solid var(--line);
@@ -92,7 +89,6 @@
     background:rgba(255,255,255,.06);
   }
 
-  /* names = 1 row on phone */
   .names{
     display:grid;
     grid-template-columns:repeat(4, minmax(0,1fr));
@@ -145,24 +141,46 @@
   .dealerCol{ box-shadow: inset 0 0 0 2px rgba(255,216,74,.45); }
   .openerCol{ box-shadow: inset 0 0 0 2px rgba(107,255,138,.40); }
 
+  /* Cell container */
   .cell{
     position:relative;
     height:var(--cellH);
     border-radius:10px;
     border:1px solid rgba(255,255,255,.10);
     background:rgba(0,0,0,.18);
+    overflow:hidden;
     display:flex;
     align-items:center;
     justify-content:center;
+  }
+
+  /* Real input inside each cell (keyboard always works) */
+  .scoreInput{
+    width:100%;
+    height:100%;
+    border:0;
+    outline:none;
+    background:transparent;
+    color:var(--fg);
     font-weight:950;
     font-size:13px;
-    user-select:none;
-    overflow:hidden;
+    text-align:center;
+    padding:0;
+    margin:0;
+    appearance:none;
+    -webkit-appearance:none;
   }
-  .cell.blank{ color:rgba(242,242,243,.18); }
-  .cell.disabled{ opacity:.45; }
-  .cell.tap{ cursor:pointer; }
+  .scoreInput::placeholder{ color:rgba(242,242,243,.18); }
 
+  /* When cell should show circle, we hide input and show circle overlay */
+  .circleOverlay{
+    position:absolute;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+  }
   .circle{
     width:36px; height:36px;
     border-radius:999px;
@@ -181,30 +199,13 @@
     border-radius:999px;
     background:var(--fg);
     opacity:.95;
+    display:none;
+    pointer-events:none;
   }
 
-  .editOverlay{
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:rgba(10,10,12,.55);
-    backdrop-filter: blur(6px);
-  }
-
-  /* IMPORTANT: use type="tel" + inputmode numeric for iOS homescreen keypad */
-  .editor{
-    width:68px;
-    height:34px;
-    border-radius:10px;
-    border:1px solid var(--line);
-    background:#0c0c10;
-    color:var(--fg);
-    font-weight:950;
-    font-size:14px;
-    text-align:center;
-    outline:none;
+  .disabled{
+    opacity:.45;
+    pointer-events:none;
   }
 
   .doneRow td{
@@ -217,7 +218,6 @@
     align-items:center;
     gap:6px;
   }
-
   .miniBtn{
     border:1px solid var(--line);
     background:rgba(255,255,255,.05);
@@ -241,7 +241,6 @@
     color:var(--fg);
   }
 
-  /* totals: 1 compact row */
   .totalsRow{
     margin-top:6px;
     display:grid;
@@ -261,7 +260,6 @@
   }
   .tval{ margin-top:3px; font-size:16px; font-weight:980; }
 
-  /* Reset sheet */
   .sheetBack{
     position:fixed; inset:0;
     background:rgba(0,0,0,.55);
@@ -283,18 +281,15 @@
   .sheetText{ color:var(--muted); font-size:12px; margin-top:6px; line-height:1.25; }
   .sheetRow{ display:flex; gap:8px; margin-top:10px; justify-content:flex-end; }
 
-  /* desktop relax */
   @media (min-width: 820px){
     .wrap{ max-width:980px; padding:14px 12px 40px; }
     .topbar{ margin:-14px -12px 12px; padding:10px 10px calc(10px + env(safe-area-inset-top)); }
     :root{ --cellH: 54px; }
-    .title{ font-size:inherit; }
     table{ margin-top:12px; font-size:inherit; }
     th, td{ padding:10px; }
     .colN{ width:56px; font-size:inherit; }
-    .cell{ font-size:16px; border-radius:14px; }
+    .scoreInput{ font-size:16px; }
     .circle{ width:46px; height:46px; font-size:inherit; }
-    .editor{ width:88px; height:40px; font-size:16px; border-radius:12px; }
     .totalsRow{ margin-top:12px; gap:10px; }
     .tbox{ padding:12px 10px; border-radius:16px; }
     .tname{ font-size:12px; }
@@ -307,13 +302,12 @@
 <div class="wrap">
   <div class="topbar">
     <div class="title">Boja calculator</div>
-    <div class="pill" id="wherePill">Game 1 • Half 1</div>
+    <div class="pill" id="wherePill">G1 • 1/2</div>
     <div class="sp"></div>
-    <button class="btn" id="newGameBtn">New game</button>
+    <button class="btn" id="newGameBtn">New</button>
     <button class="btn danger" id="resetBtn">Reset</button>
   </div>
 
-  <!-- Single compact island -->
   <div class="card">
     <div class="row">
       <div class="pill">Game</div>
@@ -366,7 +360,7 @@
 <script>
 (() => {
   "use strict";
-  const KEY = "boja_calc_compact_v1";
+  const KEY = "boja_calc_inputs_v1";
 
   function dealerOf(r){ return (r-1) % 4; }
   function openerOf(r){ return (dealerOf(r)+1) % 4; }
@@ -406,7 +400,6 @@
   const elTotals = document.getElementById("totals");
   const elWherePill = document.getElementById("wherePill");
 
-  // Reset confirm
   const resetBack = document.getElementById("resetBack");
   document.getElementById("resetBtn").addEventListener("click", () => resetBack.style.display = "flex");
   document.getElementById("cancelReset").addEventListener("click", () => resetBack.style.display = "none");
@@ -418,7 +411,6 @@
   });
   resetBack.addEventListener("click", (e) => { if(e.target === resetBack) resetBack.style.display = "none"; });
 
-  // New game
   document.getElementById("newGameBtn").addEventListener("click", () => {
     state.games.push(makeGame());
     state.viewGame = state.games.length - 1;
@@ -450,7 +442,6 @@
           2: Array.isArray(g?.orders?.["2"] || g?.orders?.[2]) ? (g.orders["2"] || g.orders[2]) : null
         }
       }));
-
       return s;
     }catch{
       return defaultState();
@@ -480,6 +471,10 @@
     if(!Number.isFinite(n)) return null;
     return Math.trunc(n);
   }
+  function clamp013(v){
+    if(v === null) return null;
+    return Math.max(0, Math.min(13, v));
+  }
   function escapeHtml(s){
     return String(s)
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
@@ -500,12 +495,9 @@
   function currentRounds(){
     return getGame().halves[state.viewHalf].rounds;
   }
-
   function roundComplete(values){
     return values.every(v => v !== null && v !== undefined);
   }
-
-  // W = bid + sum(non-bidders)
   function computeW(values, bidder, bidAmount){
     let nonSum = 0;
     for(let p=0;p<4;p++){
@@ -518,6 +510,7 @@
   function displayForCell(r, pReal){
     const v = r.values[pReal];
     if(v === null) return { kind:"blank", text:"", score:0 };
+
     if(!r.finalized) return { kind:"num", text:String(v), score:v };
 
     if(r.bidder == null || r.bidAmount == null){
@@ -580,7 +573,6 @@
     }
     return tot;
   }
-
   function totalsUpTo10(){
     const rounds = currentRounds();
     const tot = [0,0,0,0];
@@ -609,7 +601,6 @@
       b.textContent = `G${idx+1}`;
       b.classList.toggle("active", idx === state.viewGame);
       b.addEventListener("click", () => {
-        closeActiveEditor(true);
         state.viewGame = idx;
         save(); render();
       });
@@ -624,23 +615,13 @@
     r.bidAmount = null;
   }
 
-  // ---- editing (tap next cell keeps keypad) ----
-  let activeEditor = null;
-  function closeActiveEditor(commit){
-    if(!activeEditor) return;
-    const { commitFn, renderFn } = activeEditor;
-    activeEditor = null;
-    if(commit) commitFn();
-    else renderFn();
-  }
-
   function render(){
     renderGameSeg();
     elHalf1.classList.toggle("active", state.viewHalf === 1);
     elHalf2.classList.toggle("active", state.viewHalf === 2);
     elWherePill.textContent = `G${state.viewGame+1} • ${state.viewHalf}/2`;
 
-    // names
+    // Names
     elNames.innerHTML = "";
     for(let i=0;i<4;i++){
       const inp = document.createElement("input");
@@ -660,7 +641,7 @@
       elNames.appendChild(inp);
     }
 
-    // headers
+    // Headers
     for(let k=0;k<4;k++){
       const ri = realIndex(k);
       document.getElementById("h"+k).textContent = pname(ri);
@@ -671,7 +652,6 @@
     elTbody.innerHTML = "";
 
     for(let idx=0; idx<11; idx++){
-      // R row between 10 and 11
       if(idx === 10){
         const rTotals = totalsUpTo10();
         const trR = document.createElement("tr");
@@ -685,7 +665,7 @@
         for(let k=0;k<4;k++){
           const ri = realIndex(k);
           const td = document.createElement("td");
-          td.innerHTML = `<div style="font-weight:980;color:var(--fg);">${rTotals[ri]}</div>`;
+          td.textContent = String(rTotals[ri]);
           trR.appendChild(td);
         }
         elTbody.appendChild(trR);
@@ -702,122 +682,115 @@
 
       const dealer = dealerOf(roundNumber);
       const opener = openerOf(roundNumber);
+      const isActiveRound = (idx === activeIdx);
       const isEditableNow = (idx <= activeIdx);
-      const showTurnColors = (idx === activeIdx);
 
       for(let k=0;k<4;k++){
         const ri = realIndex(k);
-
         const td = document.createElement("td");
-        if(showTurnColors){
+
+        if(isActiveRound){
           if(k === dealer) td.classList.add("dealerCol");
           if(k === opener) td.classList.add("openerCol");
         }
 
-        const box = document.createElement("div");
-        box.className = "cell";
+        const cell = document.createElement("div");
+        cell.className = "cell";
 
-        const d = displayForCell(r, ri);
-        if(d.kind === "blank"){ box.classList.add("blank"); box.textContent = ""; }
-        else if(d.kind === "num"){ box.textContent = d.text; }
-        else { box.innerHTML = `<div class="circle">${d.text}</div>`; }
+        const input = document.createElement("input");
+        input.className = "scoreInput";
+        input.type = "tel";
+        input.inputMode = "numeric";
+        input.pattern = "[0-9]*";
+        input.autocomplete = "off";
+        input.autocapitalize = "off";
+        input.spellcheck = false;
+        input.placeholder = "";
+        input.value = (r.values[ri] === null) ? "" : String(r.values[ri]);
+
+        // Lock future rounds
+        if(!isEditableNow){
+          cell.classList.add("disabled");
+          input.disabled = true;
+        }
+
+        // On focus: allow editing and ensure it becomes active round for recalcs
+        input.addEventListener("focus", () => {
+          if(!isEditableNow) return;
+          unfinalizeFrom(rounds, idx);
+        });
+
+        // On input: digits only + clamp, update bidder rules immediately
+        input.addEventListener("input", () => {
+          if(!isEditableNow) return;
+          const raw = (input.value || "").replace(/[^\d]/g, "");
+          input.value = raw;
+
+          let val = raw === "" ? null : clamp013(Math.trunc(Number(raw)));
+          if(val === null) r.values[ri] = null;
+          else r.values[ri] = val;
+
+          // bidder = first non-null entry in round (if not set)
+          if(r.bidder == null && val != null){
+            r.bidder = ri;
+            r.bidAmount = val;
+          }
+          // if editing bidder cell, keep bidAmount synced
+          if(r.bidder === ri){
+            r.bidAmount = val;
+          }
+
+          // if all cleared, reset bidder info
+          const any = r.values.some(x => x != null);
+          if(!any){
+            r.bidder = null;
+            r.bidAmount = null;
+          }
+
+          save();
+          // re-render to apply circles/score changes live
+          render();
+        });
+
+        const circleWrap = document.createElement("div");
+        circleWrap.className = "circleOverlay";
+
+        const circle = document.createElement("div");
+        circle.className = "circle";
+        circleWrap.appendChild(circle);
+
+        const dot = document.createElement("div");
+        dot.className = "bidDot";
+
+        // Apply display mode (circle vs number) if finalized
+        const disp = displayForCell(r, ri);
+        if(r.finalized && disp.kind === "circ"){
+          circle.textContent = disp.text;
+          circleWrap.style.display = "flex";
+          input.style.opacity = "0";
+          input.style.pointerEvents = "auto"; // still editable
+        }else{
+          circleWrap.style.display = "none";
+          input.style.opacity = "1";
+        }
 
         if(r.finalized && r.bidder === ri){
-          const dot = document.createElement("div");
-          dot.className = "bidDot";
-          box.appendChild(dot);
+          dot.style.display = "block";
+        }else{
+          dot.style.display = "none";
         }
 
-        if(!isEditableNow){
-          box.classList.add("disabled");
-        } else {
-          box.classList.add("tap");
-          box.addEventListener("click", (ev) => {
-            ev.preventDefault();
+        cell.appendChild(input);
+        cell.appendChild(circleWrap);
+        cell.appendChild(dot);
 
-            // commit current editor first, then open next immediately
-            closeActiveEditor(true);
-            unfinalizeFrom(rounds, idx);
-
-            box.innerHTML = "";
-            const overlay = document.createElement("div");
-            overlay.className = "editOverlay";
-
-            // iOS homescreen: use tel to force keypad
-            const inp = document.createElement("input");
-            inp.className = "editor";
-            inp.type = "tel";
-            inp.inputMode = "numeric";
-            inp.autocomplete = "off";
-            inp.spellcheck = false;
-            inp.autocapitalize = "off";
-            inp.pattern = "[0-9]*";
-            inp.value = (r.values[ri] === null) ? "" : String(r.values[ri]);
-
-            overlay.appendChild(inp);
-            box.appendChild(overlay);
-
-            const commit = () => {
-              let raw = (inp.value || "").trim();
-              raw = raw.replace(/[^\d]/g, ""); // keep digits only
-              const newVal = raw === "" ? null : Math.trunc(Number(raw));
-
-              // clamp 0..13
-              const val = (newVal === null) ? null : Math.max(0, Math.min(13, newVal));
-
-              r.values[ri] = val;
-
-              if(r.bidder == null && val != null){
-                r.bidder = ri;
-                r.bidAmount = val;
-              }
-              if(r.bidder === ri){
-                r.bidAmount = val;
-              }
-
-              const any = r.values.some(x => x != null);
-              if(!any){
-                r.bidder = null;
-                r.bidAmount = null;
-              }
-
-              save();
-              render();
-            };
-
-            const renderOnly = () => render();
-            activeEditor = { commitFn: commit, renderFn: renderOnly };
-
-            // focus reliably in standalone
-            setTimeout(() => inp.focus(), 0);
-
-            inp.addEventListener("blur", () => {
-              // if user taps outside (not another cell), commit
-              if(activeEditor){
-                closeActiveEditor(true);
-              }
-            });
-
-            inp.addEventListener("keydown", (e) => {
-              if(e.key === "Enter"){ e.preventDefault(); closeActiveEditor(true); }
-              if(e.key === "Escape"){ e.preventDefault(); closeActiveEditor(false); }
-            });
-
-            overlay.addEventListener("click", (e) => {
-              if(e.target === overlay){
-                closeActiveEditor(true);
-              }
-            });
-          });
-        }
-
-        td.appendChild(box);
+        td.appendChild(cell);
         tr.appendChild(td);
       }
 
       elTbody.appendChild(tr);
 
-      // Done row (active only)
+      // Done row
       const trDone = document.createElement("tr");
       trDone.className = "doneRow";
       const tdDone = document.createElement("td");
@@ -830,26 +803,20 @@
       clearBtn.className = "miniBtn";
       clearBtn.type = "button";
       clearBtn.textContent = "Clear";
-      clearBtn.disabled = (idx !== activeIdx);
+      clearBtn.disabled = !isActiveRound;
       clearBtn.addEventListener("click", () => {
-        closeActiveEditor(false);
         clearRound(r);
-        save();
-        render();
+        save(); render();
       });
 
       const doneBtn = document.createElement("button");
       doneBtn.className = "btn";
       doneBtn.type = "button";
       doneBtn.textContent = "Done ✓";
-
-      const canDone = (idx === activeIdx) && (r.bidder != null) && (r.bidAmount != null);
-      doneBtn.disabled = !canDone;
+      doneBtn.disabled = !(isActiveRound && r.bidder != null && r.bidAmount != null);
       doneBtn.addEventListener("click", () => {
-        closeActiveEditor(true);
         r.finalized = true;
-        save();
-        render();
+        save(); render();
       });
 
       wrap.appendChild(clearBtn);
@@ -859,7 +826,7 @@
       elTbody.appendChild(trDone);
     }
 
-    // totals (display in current order)
+    // totals in current order
     const t = totalsForView();
     elTotals.innerHTML = "";
     for(let k=0;k<4;k++){
@@ -876,15 +843,12 @@
     save();
   }
 
-  // half switching
   elHalf1.addEventListener("click", () => {
-    closeActiveEditor(true);
     state.viewHalf = 1;
     save(); render();
   });
 
   elHalf2.addEventListener("click", () => {
-    closeActiveEditor(true);
     const g = getGame();
     if(!g.orders[2] && halfIsFinished(g, 1)){
       const loser = loserIndexHalf1(g);
