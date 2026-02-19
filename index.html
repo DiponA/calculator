@@ -6,155 +6,195 @@
 <title>Boja Calculator</title>
 <style>
   :root{
-    --bg:#0a0a0c;
-    --panel:#101015;
-    --panel2:#14141b;
-    --line:#2a2a35;
-    --fg:#f2f2f3;
-    --muted:#a9a9b3;
-    --dealer:#ffd84a;
-    --opener:#6bff8a;
-    --cellH: 46px;
+    /* calmer palette */
+    --bg:#07070a;
+    --panel: rgba(255,255,255,.045);
+    --panel2: rgba(255,255,255,.055);
+    --line: rgba(255,255,255,.08);
+    --line2: rgba(255,255,255,.12);
+    --fg: rgba(255,255,255,.92);
+    --muted: rgba(255,255,255,.60);
+
+    --dealer: rgba(255,216,74,.95);
+    --opener: rgba(107,255,138,.95);
+    --danger: rgba(255,91,91,.95);
+
+    --cellH: 44px;
+    --topbarH: 56px;
+
+    --r: 16px;
+    --r2: 12px;
   }
+
   *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height:100%; }
   body{
-    margin:0; background:var(--bg); color:var(--fg);
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(107,255,138,.08), transparent 55%),
+      radial-gradient(1000px 500px at 90% 0%, rgba(255,216,74,.06), transparent 55%),
+      radial-gradient(900px 600px at 50% 110%, rgba(160,120,255,.06), transparent 60%),
+      var(--bg);
+    color:var(--fg);
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     font-size:13px;
   }
-  .wrap{ max-width:100%; margin:0 auto; padding:6px 6px 14px; }
 
+  .wrap{ max-width:100%; margin:0 auto; padding:8px 8px 14px; }
+
+  /* ---- Top bar ---- */
   .topbar{
-    position:sticky; top:0; z-index:10;
-    margin:-6px -6px 6px;
-    padding:6px 6px calc(6px + env(safe-area-inset-top));
-    background:linear-gradient(to bottom, rgba(10,10,12,.96), rgba(10,10,12,.78));
-    backdrop-filter: blur(12px);
+    position:sticky; top:0; z-index:40;
+    margin:-8px -8px 8px;
+    padding:10px 10px calc(10px + env(safe-area-inset-top));
+    background: rgba(10,10,14,.72);
+    backdrop-filter: blur(14px);
     border-bottom:1px solid rgba(255,255,255,.06);
-    display:flex; gap:6px; align-items:center; flex-wrap:wrap;
+    display:flex; gap:8px; align-items:center;
   }
-  .title{ font-weight:950; letter-spacing:.2px; font-size:13px; }
+  .title{ font-weight:950; letter-spacing:.2px; font-size:14px; }
   .pill{
-    font-size:10.5px; color:var(--muted);
+    font-size:11px; color:var(--muted);
     border:1px solid var(--line);
     background:rgba(255,255,255,.04);
-    padding:4px 7px;
+    padding:5px 9px;
     border-radius:999px;
     white-space:nowrap;
   }
   .sp{ flex:1; }
   .btn{
     border:1px solid var(--line);
-    background:rgba(255,255,255,.06);
+    background:rgba(255,255,255,.05);
     color:var(--fg);
-    padding:6px 9px;
-    border-radius:12px;
+    padding:7px 11px;
+    border-radius:999px;
     font-weight:900;
     cursor:pointer;
     user-select:none;
-    font-size:11.5px;
+    font-size:12px;
+    line-height:1;
   }
   .btn:active{ transform:translateY(1px); }
   .btn:disabled{ opacity:.45; cursor:not-allowed; }
-  .btn.danger{ border-color: rgba(255,111,111,.35); }
+  .btn.danger{ border-color: rgba(255,91,91,.35); }
+
+  /* sticky controls under topbar */
+  .stickyControls{
+    position:sticky;
+    top: var(--topbarH);
+    z-index:35;
+    margin-top:-6px;
+    padding-top:6px;
+    background: linear-gradient(to bottom, rgba(7,7,10,.78), rgba(7,7,10,.35));
+    backdrop-filter: blur(14px);
+  }
 
   .card{
-    background:var(--panel);
+    background: var(--panel);
     border:1px solid var(--line);
-    border-radius:14px;
-    padding:8px;
+    border-radius: var(--r);
+    padding:10px;
+    box-shadow:
+      0 10px 30px rgba(0,0,0,.25),
+      inset 0 1px 0 rgba(255,255,255,.06);
   }
-  .card + .card{ margin-top:6px; }
+  .card + .card{ margin-top:8px; }
 
-  .row{ display:flex; gap:6px; align-items:center; flex-wrap:nowrap; }
+  .row{ display:flex; gap:8px; align-items:center; flex-wrap:nowrap; }
+
   .seg{
     display:inline-flex;
     border:1px solid var(--line);
-    border-radius:12px;
+    border-radius:999px;
     overflow:hidden;
     background:rgba(255,255,255,.03);
   }
   .seg button{
     border:0;
-    padding:6px 8px;
+    padding:7px 11px;
     background:transparent;
     color:var(--muted);
     font-weight:950;
     cursor:pointer;
     white-space:nowrap;
-    font-size:10.5px;
+    font-size:12px;
   }
   .seg button.active{
     color:var(--fg);
-    background:rgba(255,255,255,.06);
+    background:rgba(255,255,255,.07);
   }
 
   .names{
     display:grid;
     grid-template-columns:repeat(4, minmax(0,1fr));
-    gap:6px;
-    margin-top:6px;
+    gap:8px;
+    margin-top:10px;
   }
   input.name{
     width:100%;
     border:1px solid var(--line);
-    background:var(--panel2);
+    background: var(--panel2);
     color:var(--fg);
-    border-radius:10px;
-    padding:6px 7px;
+    border-radius: 14px;
+    padding:10px 10px;
     font-weight:900;
     outline:none;
-    font-size:11.5px;
+    font-size:13px;
     min-width:0;
   }
+  input.name::placeholder{ color: rgba(255,255,255,.28); font-weight:900; }
+  .name.loserMark{
+    border-color: rgba(255,91,91,.45);
+    box-shadow: inset 0 0 0 2px rgba(255,91,91,.14);
+  }
 
+  /* ---- Table ---- */
   table{
     width:100%;
     table-layout:fixed;
     border-collapse:separate;
     border-spacing:0;
-    margin-top:6px;
+    margin-top:10px;
     overflow:hidden;
     border:1px solid var(--line);
-    border-radius:12px;
-    font-size:11.5px;
+    border-radius: var(--r);
+    font-size:12.5px;
+    background: rgba(255,255,255,.02);
   }
   th, td{
-    border-bottom:1px solid var(--line);
-    border-right:1px solid var(--line);
-    padding:5px 3px;
+    border-bottom:1px solid rgba(255,255,255,.07);
+    border-right:1px solid rgba(255,255,255,.07);
+    padding:7px 6px;
     text-align:center;
     vertical-align:middle;
   }
   tr:last-child td{ border-bottom:0; }
   th:last-child, td:last-child{ border-right:0; }
   th{
-    color:var(--muted);
-    font-size:10.5px;
+    color:rgba(255,255,255,.62);
+    font-size:11.5px;
     font-weight:950;
-    background:rgba(255,255,255,.03);
+    background: rgba(255,255,255,.03);
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  td{ background:rgba(0,0,0,.10); }
-  .colN{ width:30px; color:var(--muted); font-weight:950; font-size:10.5px; }
+  td{ background: rgba(0,0,0,.12); }
+  .colN{ width:34px; color:rgba(255,255,255,.55); font-weight:950; font-size:11.5px; }
 
-  .dealerCol{ box-shadow: inset 0 0 0 2px rgba(255,216,74,.45); }
-  .openerCol{ box-shadow: inset 0 0 0 2px rgba(107,255,138,.40); }
+  .dealerCol{ box-shadow: inset 0 0 0 2px rgba(255,216,74,.26); }
+  .openerCol{ box-shadow: inset 0 0 0 2px rgba(107,255,138,.22); }
 
-  /* Cell container */
   .cell{
     position:relative;
     height:var(--cellH);
-    border-radius:10px;
+    border-radius: 14px;
     border:1px solid rgba(255,255,255,.10);
-    background:rgba(0,0,0,.18);
+    background: rgba(255,255,255,.035);
     overflow:hidden;
     display:flex;
     align-items:center;
     justify-content:center;
   }
 
-  /* Real input inside each cell (keyboard always works) */
   .scoreInput{
     width:100%;
     height:100%;
@@ -163,16 +203,15 @@
     background:transparent;
     color:var(--fg);
     font-weight:950;
-    font-size:13px;
+    font-size:14px;
     text-align:center;
     padding:0;
     margin:0;
     appearance:none;
     -webkit-appearance:none;
   }
-  .scoreInput::placeholder{ color:rgba(242,242,243,.18); }
+  .scoreInput::placeholder{ color:rgba(255,255,255,.18); }
 
-  /* When cell should show circle, we hide input and show circle overlay */
   .circleOverlay{
     position:absolute;
     inset:0;
@@ -184,12 +223,13 @@
   .circle{
     width:36px; height:36px;
     border-radius:999px;
-    border:2px solid var(--fg);
+    border:2px solid rgba(255,255,255,.80);
     display:flex;
     align-items:center;
     justify-content:center;
     font-weight:950;
-    font-size:11px;
+    font-size:12px;
+    background: rgba(0,0,0,.10);
   }
 
   .bidDot{
@@ -197,110 +237,109 @@
     top:7px; right:7px;
     width:7px; height:7px;
     border-radius:999px;
-    background:var(--fg);
+    background:rgba(255,255,255,.9);
     opacity:.95;
     display:none;
     pointer-events:none;
   }
 
-  .disabled{
-    opacity:.45;
-    pointer-events:none;
-  }
+  .disabled{ opacity:.45; pointer-events:none; }
 
   .doneRow td{
-    background:rgba(0,0,0,.06);
-    padding:5px 6px;
+    background: rgba(255,255,255,.02);
+    padding:8px 8px;
   }
   .doneWrap{
     display:flex;
     justify-content:flex-end;
     align-items:center;
-    gap:6px;
+    gap:8px;
   }
   .miniBtn{
     border:1px solid var(--line);
-    background:rgba(255,255,255,.05);
+    background:rgba(255,255,255,.045);
     color:var(--fg);
-    padding:6px 8px;
-    border-radius:10px;
+    padding:7px 11px;
+    border-radius:999px;
     font-weight:950;
     cursor:pointer;
-    font-size:11.5px;
+    font-size:12px;
+    line-height:1;
   }
   .miniBtn:disabled{ opacity:.45; cursor:not-allowed; }
 
   .rrow td{
-    background:rgba(255,255,255,.03);
-    color:var(--muted);
+    background: rgba(255,255,255,.03);
+    color: rgba(255,255,255,.62);
     font-weight:950;
   }
   .rlabel{
     font-weight:980;
     letter-spacing:.3px;
-    color:var(--fg);
+    color:rgba(255,255,255,.88);
   }
 
   .totalsRow{
-    margin-top:6px;
+    margin-top:10px;
     display:grid;
     grid-template-columns: repeat(4, minmax(0,1fr));
-    gap:6px;
+    gap:8px;
   }
   .tbox{
-    background:var(--panel2);
+    background: rgba(255,255,255,.04);
     border:1px solid var(--line);
-    border-radius:12px;
-    padding:8px 6px;
+    border-radius: 16px;
+    padding:10px 10px;
     min-width:0;
   }
+  .tbox.loserMark{
+    border-color: rgba(255,91,91,.45);
+    box-shadow: inset 0 0 0 2px rgba(255,91,91,.14);
+  }
   .tname{
-    font-size:10.5px; color:var(--muted); font-weight:950;
+    font-size:11.5px; color:rgba(255,255,255,.62); font-weight:950;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
-  .tval{ margin-top:3px; font-size:16px; font-weight:980; }
+  .tval{ margin-top:5px; font-size:18px; font-weight:980; letter-spacing:.2px; }
 
+  /* reset sheet */
   .sheetBack{
     position:fixed; inset:0;
     background:rgba(0,0,0,.55);
     display:none;
     align-items:flex-end;
     justify-content:center;
-    padding:8px 8px calc(8px + env(safe-area-inset-bottom));
-    z-index:50;
+    padding:10px 10px calc(10px + env(safe-area-inset-bottom));
+    z-index:60;
   }
   .sheet{
-    width:min(100%, calc(100% - 16px));
-    background:rgba(20,20,27,.98);
+    width:min(520px, 100%);
+    background: rgba(18,18,24,.92);
     border:1px solid rgba(255,255,255,.10);
-    border-radius:14px;
-    padding:12px;
+    border-radius: 18px;
+    padding:14px;
     box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    backdrop-filter: blur(16px);
   }
   .sheetTitle{ font-weight:980; font-size:14px; }
-  .sheetText{ color:var(--muted); font-size:12px; margin-top:6px; line-height:1.25; }
-  .sheetRow{ display:flex; gap:8px; margin-top:10px; justify-content:flex-end; }
+  .sheetText{ color:rgba(255,255,255,.62); font-size:12.5px; margin-top:6px; line-height:1.25; }
+  .sheetRow{ display:flex; gap:10px; margin-top:12px; justify-content:flex-end; }
 
   @media (min-width: 820px){
     .wrap{ max-width:980px; padding:14px 12px 40px; }
-    .topbar{ margin:-14px -12px 12px; padding:10px 10px calc(10px + env(safe-area-inset-top)); }
+    .topbar{ margin:-14px -12px 12px; }
+    .stickyControls{ margin-top:-12px; padding-top:12px; }
     :root{ --cellH: 54px; }
-    table{ margin-top:12px; font-size:inherit; }
-    th, td{ padding:10px; }
-    .colN{ width:56px; font-size:inherit; }
     .scoreInput{ font-size:16px; }
-    .circle{ width:46px; height:46px; font-size:inherit; }
-    .totalsRow{ margin-top:12px; gap:10px; }
-    .tbox{ padding:12px 10px; border-radius:16px; }
-    .tname{ font-size:12px; }
-    .tval{ font-size:24px; margin-top:6px; }
+    .circle{ width:46px; height:46px; font-size:14px; }
+    .tval{ font-size:24px; }
   }
 </style>
 </head>
 
 <body>
 <div class="wrap">
-  <div class="topbar">
+  <div class="topbar" id="topbar">
     <div class="title">Boja calculator</div>
     <div class="pill" id="wherePill">G1 • 1/2</div>
     <div class="sp"></div>
@@ -308,27 +347,29 @@
     <button class="btn danger" id="resetBtn">Reset</button>
   </div>
 
-  <div class="card">
-    <div class="row">
-      <div class="pill">Game</div>
-      <div class="seg" id="gameSeg"></div>
-      <div class="pill">Half</div>
-      <div class="seg">
-        <button type="button" id="half1Btn" class="active">1/2</button>
-        <button type="button" id="half2Btn">2/2</button>
+  <div class="stickyControls">
+    <div class="card">
+      <div class="row">
+        <div class="pill">Game</div>
+        <div class="seg" id="gameSeg"></div>
+        <div class="pill">Half</div>
+        <div class="seg">
+          <button type="button" id="half1Btn" class="active">1/2</button>
+          <button type="button" id="half2Btn">2/2</button>
+        </div>
       </div>
+      <div class="names" id="names"></div>
     </div>
-    <div class="names" id="names"></div>
   </div>
 
   <div class="card">
     <table>
       <colgroup>
-        <col style="width:30px">
-        <col style="width:calc((100% - 30px)/4)">
-        <col style="width:calc((100% - 30px)/4)">
-        <col style="width:calc((100% - 30px)/4)">
-        <col style="width:calc((100% - 30px)/4)">
+        <col style="width:34px">
+        <col style="width:calc((100% - 34px)/4)">
+        <col style="width:calc((100% - 34px)/4)">
+        <col style="width:calc((100% - 34px)/4)">
+        <col style="width:calc((100% - 34px)/4)">
       </colgroup>
       <thead>
         <tr>
@@ -360,7 +401,7 @@
 <script>
 (() => {
   "use strict";
-  const KEY = "boja_calc_inputs_v1";
+  const KEY = "boja_calc_ui_tight_v1";
 
   function dealerOf(r){ return (r-1) % 4; }
   function openerOf(r){ return (dealerOf(r)+1) % 4; }
@@ -375,12 +416,15 @@
       }))
     };
   }
+
   function makeGame(){
     return {
       halves: { 1: makeHalf(), 2: makeHalf() },
-      orders: { 1: [0,1,2,3], 2: null }
+      orders: { 1: [0,1,2,3], 2: null },
+      losers: { 1: null, 2: null }
     };
   }
+
   function defaultState(){
     return {
       players: ["","","",""],
@@ -392,6 +436,7 @@
 
   let state = load();
 
+  const topbar = document.getElementById("topbar");
   const elGameSeg = document.getElementById("gameSeg");
   const elHalf1 = document.getElementById("half1Btn");
   const elHalf2 = document.getElementById("half2Btn");
@@ -400,6 +445,12 @@
   const elTotals = document.getElementById("totals");
   const elWherePill = document.getElementById("wherePill");
 
+  function syncTopbarH(){
+    const h = topbar.offsetHeight || 56;
+    document.documentElement.style.setProperty("--topbarH", h + "px");
+  }
+  window.addEventListener("resize", () => { syncTopbarH(); });
+
   const resetBack = document.getElementById("resetBack");
   document.getElementById("resetBtn").addEventListener("click", () => resetBack.style.display = "flex");
   document.getElementById("cancelReset").addEventListener("click", () => resetBack.style.display = "none");
@@ -407,7 +458,7 @@
     localStorage.removeItem(KEY);
     state = defaultState();
     resetBack.style.display = "none";
-    save(); render();
+    save(); scheduleRender(true);
   });
   resetBack.addEventListener("click", (e) => { if(e.target === resetBack) resetBack.style.display = "none"; });
 
@@ -415,7 +466,7 @@
     state.games.push(makeGame());
     state.viewGame = state.games.length - 1;
     state.viewHalf = 1;
-    save(); render();
+    save(); scheduleRender(true);
   });
 
   function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
@@ -440,6 +491,10 @@
         orders: {
           1: Array.isArray(g?.orders?.["1"] || g?.orders?.[1]) ? (g.orders["1"] || g.orders[1]) : [0,1,2,3],
           2: Array.isArray(g?.orders?.["2"] || g?.orders?.[2]) ? (g.orders["2"] || g.orders[2]) : null
+        },
+        losers: {
+          1: (Number.isInteger(g?.losers?.["1"] ?? g?.losers?.[1])) ? (g.losers["1"] ?? g.losers[1]) : null,
+          2: (Number.isInteger(g?.losers?.["2"] ?? g?.losers?.[2])) ? (g.losers["2"] ?? g.losers[2]) : null
         }
       }));
       return s;
@@ -510,7 +565,6 @@
   function displayForCell(r, pReal){
     const v = r.values[pReal];
     if(v === null) return { kind:"blank", text:"", score:0 };
-
     if(!r.finalized) return { kind:"num", text:String(v), score:v };
 
     if(r.bidder == null || r.bidAmount == null){
@@ -540,27 +594,10 @@
     const tot = [0,0,0,0];
     for(const r of rounds){
       for(let i=0;i<4;i++){
-        const d = displayForCell(r, i);
-        tot[i] += d.score;
+        tot[i] += displayForCell(r, i).score;
       }
     }
     return tot;
-  }
-  function halfIsFinished(game, half){
-    return game.halves[half].rounds.every(r => r.finalized);
-  }
-  function loserIndexHalf1(game){
-    const t = totalsForHalf(game, 1);
-    let loser = 0;
-    for(let i=1;i<4;i++){
-      if(t[i] < t[loser]) loser = i;
-    }
-    return loser;
-  }
-  function rotatedOrderStartingAt(startIdx){
-    const base = [0,1,2,3];
-    const pos = base.indexOf(startIdx);
-    return base.slice(pos).concat(base.slice(0,pos));
   }
 
   function totalsForView(){
@@ -573,6 +610,7 @@
     }
     return tot;
   }
+
   function totalsUpTo10(){
     const rounds = currentRounds();
     const tot = [0,0,0,0];
@@ -585,12 +623,49 @@
     return tot;
   }
 
+  function halfIsFinished(game, half){
+    return game.halves[half].rounds.every(r => r.finalized);
+  }
+
+  function loserIndexForHalf(game, half){
+    const t = totalsForHalf(game, half);
+    let loser = 0;
+    for(let i=1;i<4;i++){
+      if(t[i] < t[loser]) loser = i;
+    }
+    return loser;
+  }
+
+  function rotatedOrderStartingAt(startIdx){
+    const base = [0,1,2,3];
+    const pos = base.indexOf(startIdx);
+    return base.slice(pos).concat(base.slice(0,pos));
+  }
+
   function activeRoundIndex(rounds){
     const i = rounds.findIndex(r => !r.finalized);
     return (i === -1) ? 10 : i;
   }
   function unfinalizeFrom(rounds, idx){
     for(let i=idx;i<rounds.length;i++) rounds[i].finalized = false;
+  }
+
+  function clearRound(r){
+    r.values = [null,null,null,null];
+    r.finalized = false;
+    r.bidder = null;
+    r.bidAmount = null;
+  }
+
+  function onHalfFinishedMaybeSetLoser(game, half){
+    if(!halfIsFinished(game, half)) return;
+
+    const loser = loserIndexForHalf(game, half);
+    game.losers[half] = loser;
+
+    if(half === 1 && !game.orders[2]){
+      game.orders[2] = rotatedOrderStartingAt(loser);
+    }
   }
 
   function renderGameSeg(){
@@ -602,35 +677,53 @@
       b.classList.toggle("active", idx === state.viewGame);
       b.addEventListener("click", () => {
         state.viewGame = idx;
-        save(); render();
+        save(); scheduleRender(true);
       });
       elGameSeg.appendChild(b);
     });
   }
 
-  function clearRound(r){
-    r.values = [null,null,null,null];
-    r.finalized = false;
-    r.bidder = null;
-    r.bidAmount = null;
+  let renderQueued = false;
+  let forceFull = false;
+  function scheduleRender(full){
+    forceFull = forceFull || !!full;
+    if(renderQueued) return;
+    renderQueued = true;
+    requestAnimationFrame(() => {
+      renderQueued = false;
+      render(forceFull);
+      forceFull = false;
+    });
   }
 
   function render(){
+    syncTopbarH();
     renderGameSeg();
+
     elHalf1.classList.toggle("active", state.viewHalf === 1);
     elHalf2.classList.toggle("active", state.viewHalf === 2);
     elWherePill.textContent = `G${state.viewGame+1} • ${state.viewHalf}/2`;
 
+    const game = getGame();
+    const loserForThisHalf = game.losers[state.viewHalf];
+    const showLoserMark = (loserForThisHalf != null) && halfIsFinished(game, state.viewHalf);
+
     // Names
     elNames.innerHTML = "";
-    for(let i=0;i<4;i++){
+    for(let display=0; display<4; display++){
+      const real = realIndex(display);
       const inp = document.createElement("input");
       inp.className = "name";
       inp.type = "text";
-      inp.placeholder = `Player ${i+1}`;
-      inp.value = state.players[i] || "";
+      inp.placeholder = `Player ${real+1}`;
+      inp.value = state.players[real] || "";
+
+      if(showLoserMark && real === loserForThisHalf){
+        inp.classList.add("loserMark");
+      }
+
       inp.addEventListener("input", () => {
-        state.players[i] = inp.value;
+        state.players[real] = inp.value;
         for(let k=0;k<4;k++){
           const ri = realIndex(k);
           document.getElementById("h"+k).textContent = pname(ri);
@@ -641,7 +734,6 @@
       elNames.appendChild(inp);
     }
 
-    // Headers
     for(let k=0;k<4;k++){
       const ri = realIndex(k);
       document.getElementById("h"+k).textContent = pname(ri);
@@ -656,12 +748,10 @@
         const rTotals = totalsUpTo10();
         const trR = document.createElement("tr");
         trR.className = "rrow";
-
         const tdLabel = document.createElement("td");
         tdLabel.className = "colN rlabel";
         tdLabel.textContent = "R";
         trR.appendChild(tdLabel);
-
         for(let k=0;k<4;k++){
           const ri = realIndex(k);
           const td = document.createElement("td");
@@ -685,13 +775,13 @@
       const isActiveRound = (idx === activeIdx);
       const isEditableNow = (idx <= activeIdx);
 
-      for(let k=0;k<4;k++){
-        const ri = realIndex(k);
+      for(let display=0; display<4; display++){
+        const real = realIndex(display);
         const td = document.createElement("td");
 
         if(isActiveRound){
-          if(k === dealer) td.classList.add("dealerCol");
-          if(k === opener) td.classList.add("openerCol");
+          if(display === dealer) td.classList.add("dealerCol");
+          if(display === opener) td.classList.add("openerCol");
         }
 
         const cell = document.createElement("div");
@@ -706,41 +796,34 @@
         input.autocapitalize = "off";
         input.spellcheck = false;
         input.placeholder = "";
-        input.value = (r.values[ri] === null) ? "" : String(r.values[ri]);
+        input.value = (r.values[real] === null) ? "" : String(r.values[real]);
 
-        // Lock future rounds
         if(!isEditableNow){
           cell.classList.add("disabled");
           input.disabled = true;
         }
 
-        // On focus: allow editing and ensure it becomes active round for recalcs
         input.addEventListener("focus", () => {
           if(!isEditableNow) return;
           unfinalizeFrom(rounds, idx);
         });
 
-        // On input: digits only + clamp, update bidder rules immediately
         input.addEventListener("input", () => {
           if(!isEditableNow) return;
           const raw = (input.value || "").replace(/[^\d]/g, "");
           input.value = raw;
 
-          let val = raw === "" ? null : clamp013(Math.trunc(Number(raw)));
-          if(val === null) r.values[ri] = null;
-          else r.values[ri] = val;
+          const val = raw === "" ? null : clamp013(Math.trunc(Number(raw)));
+          r.values[real] = val;
 
-          // bidder = first non-null entry in round (if not set)
           if(r.bidder == null && val != null){
-            r.bidder = ri;
+            r.bidder = real;
             r.bidAmount = val;
           }
-          // if editing bidder cell, keep bidAmount synced
-          if(r.bidder === ri){
+          if(r.bidder === real){
             r.bidAmount = val;
           }
 
-          // if all cleared, reset bidder info
           const any = r.values.some(x => x != null);
           if(!any){
             r.bidder = null;
@@ -748,8 +831,7 @@
           }
 
           save();
-          // re-render to apply circles/score changes live
-          render();
+          scheduleRender(false);
         });
 
         const circleWrap = document.createElement("div");
@@ -762,23 +844,18 @@
         const dot = document.createElement("div");
         dot.className = "bidDot";
 
-        // Apply display mode (circle vs number) if finalized
-        const disp = displayForCell(r, ri);
+        const disp = displayForCell(r, real);
         if(r.finalized && disp.kind === "circ"){
           circle.textContent = disp.text;
           circleWrap.style.display = "flex";
           input.style.opacity = "0";
-          input.style.pointerEvents = "auto"; // still editable
+          input.style.pointerEvents = "auto";
         }else{
           circleWrap.style.display = "none";
           input.style.opacity = "1";
         }
 
-        if(r.finalized && r.bidder === ri){
-          dot.style.display = "block";
-        }else{
-          dot.style.display = "none";
-        }
+        dot.style.display = (r.finalized && r.bidder === real) ? "block" : "none";
 
         cell.appendChild(input);
         cell.appendChild(circleWrap);
@@ -790,7 +867,6 @@
 
       elTbody.appendChild(tr);
 
-      // Done row
       const trDone = document.createElement("tr");
       trDone.className = "doneRow";
       const tdDone = document.createElement("td");
@@ -806,7 +882,7 @@
       clearBtn.disabled = !isActiveRound;
       clearBtn.addEventListener("click", () => {
         clearRound(r);
-        save(); render();
+        save(); scheduleRender(true);
       });
 
       const doneBtn = document.createElement("button");
@@ -814,9 +890,14 @@
       doneBtn.type = "button";
       doneBtn.textContent = "Done ✓";
       doneBtn.disabled = !(isActiveRound && r.bidder != null && r.bidAmount != null);
+
       doneBtn.addEventListener("click", () => {
         r.finalized = true;
-        save(); render();
+        if(idx === 10){
+          onHalfFinishedMaybeSetLoser(game, state.viewHalf);
+        }
+        save();
+        scheduleRender(true);
       });
 
       wrap.appendChild(clearBtn);
@@ -826,16 +907,16 @@
       elTbody.appendChild(trDone);
     }
 
-    // totals in current order
     const t = totalsForView();
     elTotals.innerHTML = "";
-    for(let k=0;k<4;k++){
-      const ri = realIndex(k);
+    for(let display=0; display<4; display++){
+      const real = realIndex(display);
       const b = document.createElement("div");
       b.className = "tbox";
+      if(showLoserMark && real === loserForThisHalf) b.classList.add("loserMark");
       b.innerHTML = `
-        <div class="tname">${escapeHtml(pname(ri))}</div>
-        <div class="tval">${t[ri]}</div>
+        <div class="tname">${escapeHtml(pname(real))}</div>
+        <div class="tval">${t[real]}</div>
       `;
       elTotals.appendChild(b);
     }
@@ -843,22 +924,33 @@
     save();
   }
 
+  // Half switching
   elHalf1.addEventListener("click", () => {
     state.viewHalf = 1;
-    save(); render();
+    save(); scheduleRender(true);
   });
 
   elHalf2.addEventListener("click", () => {
     const g = getGame();
     if(!g.orders[2] && halfIsFinished(g, 1)){
-      const loser = loserIndexHalf1(g);
+      const loser = (g.losers[1] != null) ? g.losers[1] : loserIndexForHalf(g, 1);
       g.orders[2] = rotatedOrderStartingAt(loser);
     }
     state.viewHalf = 2;
-    save(); render();
+    save(); scheduleRender(true);
   });
 
-  render();
+  // Reset dialog
+  document.getElementById("resetBtn").addEventListener("click", () => resetBack.style.display = "flex");
+  document.getElementById("cancelReset").addEventListener("click", () => resetBack.style.display = "none");
+  document.getElementById("confirmReset").addEventListener("click", () => {
+    localStorage.removeItem(KEY);
+    state = defaultState();
+    resetBack.style.display = "none";
+    save(); scheduleRender(true);
+  });
+
+  scheduleRender(true);
 })();
 </script>
 </body>
